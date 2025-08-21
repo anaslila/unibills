@@ -1,1 +1,165 @@
+{
+  "name": "Pinvoices - Invoice Management System",
+  "short_name": "Pinvoices",
+  "description": "Professional invoice management system with POS, Professional, and Real Estate invoicing features. Create, manage, and print invoices with Indian currency formatting and GST compliance.",
+  "version": "1.0.0",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#667eea",
+  "background_color": "#ffffff",
+  "scope": "/",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Create POS Invoice",
+      "short_name": "POS Invoice",
+      "description": "Quick access to create POS invoices",
+      "url": "/?tab=pos",
+      "icons": [
+        {
+          "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Professional Invoice",
+      "short_name": "Professional",
+      "description": "Create professional GST invoices",
+      "url": "/?tab=professional",
+      "icons": [
+        {
+          "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Real Estate Invoice",
+      "short_name": "Real Estate",
+      "description": "Create real estate cost sheets",
+      "url": "/?tab=realestate",
+      "icons": [
+        {
+          "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Pinvoices Dashboard"
+    },
+    {
+      "src": "https://i.postimg.cc/7636654Z/Untitled-design.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Mobile Invoice Creation"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "navigate-new"]
+  },
+  "handle_links": "preferred",
+  "id": "pinvoices-app",
+  "protocol_handlers": [
+    {
+      "protocol": "mailto",
+      "url": "/?mailto=%s"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/",
+      "accept": {
+        "application/json": [".json"],
+        "text/csv": [".csv"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "invoice_data",
+          "accept": ["application/json", "text/csv"]
+        }
+      ]
+    }
+  },
+  "features": [
+    "cross-origin-isolated"
+  ],
+  "permissions": [
+    "persistent-storage"
+  ],
+  "gcm_sender_id": "103953800507",
+  "serviceworker": {
+    "src": "service-worker.js",
+    "scope": "/",
+    "update_via_cache": "none"
+  }
+}
 
