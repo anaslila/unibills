@@ -1,1 +1,305 @@
-
+{
+  "version": "1.0",
+  "lastUpdated": "21/Aug/2025 3:46:12 PM",
+  "metadata": {
+    "description": "User data storage for Pinvoices application",
+    "totalUsers": 3,
+    "totalInvoices": 5,
+    "totalCustomers": 8,
+    "totalProducts": 12
+  },
+  "users": {
+    "anas.lila@example.com": {
+      "profile": {
+        "email": "anas.lila@example.com",
+        "isPremium": true,
+        "joinDate": "21/Aug/2025",
+        "lastLogin": "21/Aug/2025 3:46:12 PM",
+        "totalInvoices": 3
+      },
+      "customers": [
+        {
+          "id": 1724248572001,
+          "name": "Rajesh Kumar",
+          "mobile": "+91 9876543210",
+          "address": "123 MG Road, Bangalore, Karnataka 560001",
+          "gst": "29ABCDE1234F1Z5",
+          "createdAt": "2025-08-21T10:16:12.001Z"
+        },
+        {
+          "id": 1724248572002,
+          "name": "Priya Sharma",
+          "mobile": "+91 9876543211",
+          "address": "456 Park Street, Mumbai, Maharashtra 400001",
+          "gst": "27FGHIJ5678K2A6",
+          "createdAt": "2025-08-21T10:16:12.002Z"
+        },
+        {
+          "id": 1724248572003,
+          "name": "Amit Patel",
+          "mobile": "+91 9876543212",
+          "address": "789 Civil Lines, Delhi 110001",
+          "gst": "07KLMNO9012L3B7",
+          "createdAt": "2025-08-21T10:16:12.003Z"
+        }
+      ],
+      "products": [
+        {
+          "id": 1724248572004,
+          "name": "Laptop Dell Inspiron",
+          "price": 45000,
+          "description": "Dell Inspiron 15 3000 Series, Intel Core i3, 4GB RAM, 1TB HDD",
+          "hsn": "84713000",
+          "category": "Electronics",
+          "createdAt": "2025-08-21T10:16:12.004Z"
+        },
+        {
+          "id": 1724248572005,
+          "name": "Office Chair",
+          "price": 8500,
+          "description": "Ergonomic office chair with lumbar support",
+          "hsn": "94013000",
+          "category": "Furniture",
+          "createdAt": "2025-08-21T10:16:12.005Z"
+        },
+        {
+          "id": 1724248572006,
+          "name": "Printer HP LaserJet",
+          "price": 12000,
+          "description": "HP LaserJet Pro M404n Monochrome Laser Printer",
+          "hsn": "84431900",
+          "category": "Electronics",
+          "createdAt": "2025-08-21T10:16:12.006Z"
+        }
+      ],
+      "invoices": [
+        {
+          "id": 1724248572007,
+          "type": "pos",
+          "invoiceNumber": "INV-202508-001",
+          "date": "21/Aug/2025",
+          "time": "10:16:12 AM",
+          "customer": "Rajesh Kumar",
+          "customerMobile": "+91 9876543210",
+          "items": [
+            {
+              "product": "Laptop Dell Inspiron",
+              "quantity": 1,
+              "rate": 45000,
+              "amount": 45000
+            },
+            {
+              "product": "Office Chair",
+              "quantity": 2,
+              "rate": 8500,
+              "amount": 17000
+            }
+          ],
+          "totals": {
+            "subtotal": 62000,
+            "tax": 11160,
+            "total": 73160
+          },
+          "createdAt": "2025-08-21T10:16:12.007Z"
+        },
+        {
+          "id": 1724248572008,
+          "type": "professional",
+          "invoiceNumber": "PROF-202508-001",
+          "date": "21/Aug/2025",
+          "time": "11:30:45 AM",
+          "customer": "Priya Sharma",
+          "customerGst": "27FGHIJ5678K2A6",
+          "customerAddress": "456 Park Street, Mumbai, Maharashtra 400001",
+          "items": [
+            {
+              "description": "Website Development Services",
+              "hsn": "998314",
+              "quantity": 1,
+              "rate": 50000,
+              "amount": 50000
+            },
+            {
+              "description": "SEO Optimization",
+              "hsn": "998314",
+              "quantity": 1,
+              "rate": 15000,
+              "amount": 15000
+            }
+          ],
+          "totals": {
+            "subtotal": 65000,
+            "cgst": 5850,
+            "sgst": 5850,
+            "total": 76700
+          },
+          "createdAt": "2025-08-21T11:30:45.008Z"
+        }
+      ]
+    },
+    "demo.free@gmail.com": {
+      "profile": {
+        "email": "demo.free@gmail.com",
+        "isPremium": false,
+        "joinDate": "21/Aug/2025",
+        "lastLogin": "21/Aug/2025 2:15:30 PM",
+        "totalInvoices": 1
+      },
+      "customers": [
+        {
+          "id": 1724248572009,
+          "name": "Suresh Singh",
+          "mobile": "+91 9876543213",
+          "address": "321 Market Street, Pune, Maharashtra 411001",
+          "createdAt": "2025-08-21T14:15:30.009Z"
+        }
+      ],
+      "products": [
+        {
+          "id": 1724248572010,
+          "name": "Mobile Phone",
+          "price": 15000,
+          "description": "Android smartphone",
+          "category": "Electronics",
+          "createdAt": "2025-08-21T14:15:30.010Z"
+        }
+      ],
+      "invoices": [
+        {
+          "id": 1724248572011,
+          "type": "pos",
+          "invoiceNumber": "INV-202508-002",
+          "date": "21/Aug/2025",
+          "time": "2:15:30 PM",
+          "customer": "Suresh Singh",
+          "customerMobile": "+91 9876543213",
+          "items": [
+            {
+              "product": "Mobile Phone",
+              "quantity": 1,
+              "rate": 15000,
+              "amount": 15000
+            }
+          ],
+          "totals": {
+            "subtotal": 15000,
+            "tax": 2700,
+            "total": 17700
+          },
+          "createdAt": "2025-08-21T14:15:30.011Z"
+        }
+      ]
+    },
+    "admin@pinvoices.com": {
+      "profile": {
+        "email": "admin@pinvoices.com",
+        "isPremium": true,
+        "joinDate": "21/Aug/2025",
+        "lastLogin": "21/Aug/2025 3:46:12 PM",
+        "totalInvoices": 2,
+        "role": "admin"
+      },
+      "customers": [
+        {
+          "id": 1724248572012,
+          "name": "ABC Enterprises",
+          "mobile": "+91 9876543214",
+          "address": "Corporate Office, Sector 62, Noida, UP 201301",
+          "gst": "09ABCDE1234F1Z5",
+          "createdAt": "2025-08-21T15:46:12.012Z"
+        },
+        {
+          "id": 1724248572013,
+          "name": "XYZ Construction",
+          "mobile": "+91 9876543215",
+          "address": "Building No. 5, Industrial Area, Gurgaon, HR 122001",
+          "gst": "06FGHIJ5678K2A6",
+          "createdAt": "2025-08-21T15:46:12.013Z"
+        }
+      ],
+      "products": [
+        {
+          "id": 1724248572014,
+          "name": "Residential Apartment",
+          "price": 5500000,
+          "description": "3BHK Apartment in Premium Society",
+          "category": "Real Estate",
+          "unit": "Sq.ft",
+          "createdAt": "2025-08-21T15:46:12.014Z"
+        },
+        {
+          "id": 1724248572015,
+          "name": "Commercial Plot",
+          "price": 12000,
+          "description": "Commercial plot in prime location",
+          "category": "Real Estate",
+          "unit": "Sq.ft",
+          "createdAt": "2025-08-21T15:46:12.015Z"
+        }
+      ],
+      "invoices": [
+        {
+          "id": 1724248572016,
+          "type": "realestate",
+          "invoiceNumber": "PROP-202508-001",
+          "date": "21/Aug/2025",
+          "time": "3:46:12 PM",
+          "customer": "ABC Enterprises",
+          "propertyType": "Residential",
+          "propertyAddress": "Sector 82, Faridabad, Haryana",
+          "items": [
+            {
+              "description": "Base Property Cost",
+              "unit": "1200 Sq.ft",
+              "rate": 4500,
+              "amount": 5400000
+            },
+            {
+              "description": "Parking Space",
+              "unit": "2 Units",
+              "rate": 150000,
+              "amount": 300000
+            }
+          ],
+          "totals": {
+            "subtotal": 5700000,
+            "registration": 114000,
+            "stamp": 285000,
+            "total": 6099000
+          },
+          "createdAt": "2025-08-21T15:46:12.016Z"
+        }
+      ]
+    }
+  },
+  "globalSettings": {
+    "invoiceCounter": {
+      "INV": 2,
+      "PROF": 1,
+      "PROP": 1,
+      "QUO": 0,
+      "EST": 0,
+      "REC": 0,
+      "TAX": 0
+    },
+    "taxRates": {
+      "gst": 18,
+      "cgst": 9,
+      "sgst": 9,
+      "registration": 2,
+      "stampDuty": 5
+    },
+    "businessInfo": {
+      "name": "Pinvoices",
+      "version": "1.0 (Beta)",
+      "developer": "Anas Lila",
+      "publisher": "AL Software",
+      "supportContact": "+91 8879706046"
+    }
+  },
+  "backupInfo": {
+    "lastBackup": "21/Aug/2025 3:46:12 PM",
+    "autoBackup": true,
+    "retentionDays": 30
+  }
+}
