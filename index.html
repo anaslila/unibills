@@ -1,1 +1,110 @@
-No server found!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinvoices</title>
+  <!-- Favicon -->
+  <link rel="icon" href="https://i.postimg.cc/7636654Z/Untitled-design.png" type="image/png">
+  <!-- Manifest and PWA meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Pinvoices">
+  <!-- Apple Splash Icon -->
+  <link rel="apple-touch-icon" href="https://i.postimg.cc/7636654Z/Untitled-design.png">
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Glassy Top Bar -->
+  <header id="top-bar" class="glassy">
+    <div class="brand-logo">
+      <img src="https://i.postimg.cc/7636654Z/Untitled-design.png" alt="Pinvoices Logo" height="36">
+      <span class="brand-name">Pinvoices</span>
+    </div>
+    <div class="top-bar-actions">
+      <button id="logout-btn" title="Logout" style="display:none">
+        <!-- SVG Logout Icon -->
+        <svg width="24" height="24" viewBox="0 0 24 24"><path d="M16 13v-2H7V8l-5 4 5 4v-3zm9-7v14c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-5h2v5h14V4H5V9H3V4c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Login Modal -->
+  <div id="login-modal" class="modal glassy show">
+    <form id="login-form" autocomplete="off">
+      <h2>Login to Pinvoices</h2>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="login-email" required placeholder="your@email.com">
+        <small>For premium or free access</small>
+      </div>
+      <button type="submit" class="primary-btn">Login</button>
+    </form>
+    <div id="premium-info" style="display:none">
+      <div class="premium-status glassy">
+        You are logged in as Premium user!
+      </div>
+    </div>
+    <div id="nonpremium-info" style="display:none">
+      <div class="premium-status glassy">
+        You are logged in as Free user.<br>Upgrade for unlimited invoices and items.
+        <a id="buy-premium-btn" class="whatsapp-link" href="#" target="_blank">Buy Premium (₹599 Lifetime)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main APP, hidden until login -->
+  <main id="app-container" style="display:none">
+    <nav id="main-tabs" class="glassy-tabs">
+      <button data-tab="pos" class="tab-btn active"><span class="icon"><!-- POS SVG --></span>POS Invoice</button>
+      <button data-tab="professional" class="tab-btn"><span class="icon"><!-- Professional SVG --></span>Professional Invoice</button>
+      <button data-tab="realestate" class="tab-btn"><span class="icon"><!-- Real Estate SVG --></span>Real Estate Invoice</button>
+      <button data-tab="more" class="tab-btn"><span class="icon"><!-- More SVG --></span>More</button>
+      <button data-tab="settings" class="tab-btn"><span class="icon"><!-- Settings SVG --></span>Settings</button>
+    </nav>
+
+    <!-- POS Invoice Tab -->
+    <section id="pos-tab" class="tab-content active glassy">
+      <h2>POS Invoice</h2>
+      <!-- Invoice Form here -->
+    </section>
+    <!-- Professional Invoice Tab -->
+    <section id="professional-tab" class="tab-content glassy hide">
+      <h2>Professional Invoice</h2>
+      <!-- Invoice Form here -->
+    </section>
+    <!-- Real Estate Invoice Tab -->
+    <section id="realestate-tab" class="tab-content glassy hide">
+      <h2>Real Estate Invoice (Costsheet)</h2>
+      <!-- Invoice Form here -->
+    </section>
+    <!-- More Invoice Features Tab -->
+    <section id="more-tab" class="tab-content glassy hide">
+      <h2>More Invoice Features</h2>
+      <!-- Additional invoice types/forms -->
+    </section>
+    <!-- Settings Tab -->
+    <section id="settings-tab" class="tab-content glassy hide">
+      <h2>Settings</h2>
+      <div>
+        <strong>Pinvoices v1.0 (Beta)</strong><br>
+        Developer: Anas Lila<br>
+        Published By: AL Software<br>
+        Last Updated On: <span id="last-updated"></span>
+      </div>
+    </section>
+  </main>
+
+  <!-- Customer / Inventory Modals -->
+  <div id="add-customer-modal" class="modal glassy hide">
+    <!-- Add Customer Form -->
+  </div>
+  <div id="add-product-modal" class="modal glassy hide">
+    <!-- Add Product Form -->
+  </div>
+  <!-- Icons and scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
