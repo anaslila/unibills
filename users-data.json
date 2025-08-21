@@ -1,95 +1,287 @@
 {
-  "version": "1.0",
-  "lastUpdated": "21/Aug/2025 3:46:12 PM",
+  "version": "1.0 Elite",
+  "appName": "UniBills",
+  "lastUpdated": "21/Aug/2025 4:14:00 PM IST",
   "metadata": {
-    "description": "User data storage for Pinvoices application",
-    "totalUsers": 3,
-    "totalInvoices": 5,
-    "totalCustomers": 8,
-    "totalProducts": 12
+    "description": "Complete user data storage for UniBills - Universal Invoice Management System",
+    "totalUsers": 6,
+    "totalInvoices": 12,
+    "totalCustomers": 18,
+    "totalProducts": 25,
+    "premiumUsers": 3,
+    "freeUsers": 3,
+    "developer": "Anas Lila",
+    "publisher": "AL Software",
+    "systemVersion": "1.0 Elite"
   },
   "users": {
     "anas.lila@example.com": {
       "profile": {
+        "id": 1,
+        "name": "Anas Lila",
         "email": "anas.lila@example.com",
+        "password": "admin123",
         "isPremium": true,
+        "role": "admin",
         "joinDate": "21/Aug/2025",
-        "lastLogin": "21/Aug/2025 3:46:12 PM",
-        "totalInvoices": 3
+        "lastLogin": "21/Aug/2025 4:14:00 PM IST",
+        "totalInvoices": 4,
+        "totalCustomers": 6,
+        "totalProducts": 8,
+        "preferences": {
+          "defaultInvoiceType": "professional",
+          "autoSave": true,
+          "notifications": true,
+          "theme": "auto"
+        }
       },
       "customers": [
         {
           "id": 1724248572001,
           "name": "Rajesh Kumar",
           "mobile": "+91 9876543210",
+          "email": "rajesh.kumar@business.com",
           "address": "123 MG Road, Bangalore, Karnataka 560001",
           "gst": "29ABCDE1234F1Z5",
-          "createdAt": "2025-08-21T10:16:12.001Z"
+          "city": "Bangalore",
+          "state": "Karnataka",
+          "pincode": "560001",
+          "customerType": "business",
+          "createdAt": "2025-08-21T10:16:12.001Z",
+          "lastTransaction": "2025-08-21T10:16:12.001Z",
+          "totalTransactions": 2,
+          "totalAmount": 125000
         },
         {
           "id": 1724248572002,
           "name": "Priya Sharma",
           "mobile": "+91 9876543211",
+          "email": "priya.sharma@startup.in",
           "address": "456 Park Street, Mumbai, Maharashtra 400001",
           "gst": "27FGHIJ5678K2A6",
-          "createdAt": "2025-08-21T10:16:12.002Z"
+          "city": "Mumbai",
+          "state": "Maharashtra",
+          "pincode": "400001",
+          "customerType": "business",
+          "createdAt": "2025-08-21T10:16:12.002Z",
+          "lastTransaction": "2025-08-21T11:30:45.008Z",
+          "totalTransactions": 1,
+          "totalAmount": 76700
         },
         {
           "id": 1724248572003,
           "name": "Amit Patel",
           "mobile": "+91 9876543212",
+          "email": "amit.patel@realty.com",
           "address": "789 Civil Lines, Delhi 110001",
           "gst": "07KLMNO9012L3B7",
-          "createdAt": "2025-08-21T10:16:12.003Z"
+          "city": "Delhi",
+          "state": "Delhi",
+          "pincode": "110001",
+          "customerType": "realestate",
+          "createdAt": "2025-08-21T10:16:12.003Z",
+          "lastTransaction": "2025-08-21T15:46:12.016Z",
+          "totalTransactions": 1,
+          "totalAmount": 6099000
+        },
+        {
+          "id": 1724248572020,
+          "name": "Sunita Verma",
+          "mobile": "+91 9876543220",
+          "email": "sunita.verma@gmail.com",
+          "address": "45 Sector 21, Noida, UP 201301",
+          "city": "Noida",
+          "state": "Uttar Pradesh",
+          "pincode": "201301",
+          "customerType": "individual",
+          "createdAt": "2025-08-21T14:20:30.020Z",
+          "lastTransaction": "2025-08-21T14:20:30.020Z",
+          "totalTransactions": 1,
+          "totalAmount": 25000
+        },
+        {
+          "id": 1724248572021,
+          "name": "Tech Solutions Pvt Ltd",
+          "mobile": "+91 9876543221",
+          "email": "contact@techsolutions.in",
+          "address": "Corporate Tower, Gurgaon, Haryana 122001",
+          "gst": "06ABCDE1234F1Z8",
+          "city": "Gurgaon",
+          "state": "Haryana",
+          "pincode": "122001",
+          "customerType": "corporate",
+          "createdAt": "2025-08-21T16:10:45.021Z",
+          "lastTransaction": "2025-08-21T16:10:45.021Z",
+          "totalTransactions": 1,
+          "totalAmount": 150000
+        },
+        {
+          "id": 1724248572022,
+          "name": "Ravi Construction",
+          "mobile": "+91 9876543222",
+          "email": "ravi@construction.com",
+          "address": "Building Complex, Pune, Maharashtra 411001",
+          "gst": "27FGHIJ5678K2B9",
+          "city": "Pune",
+          "state": "Maharashtra",
+          "pincode": "411001",
+          "customerType": "construction",
+          "createdAt": "2025-08-21T17:25:15.022Z",
+          "lastTransaction": "2025-08-21T17:25:15.022Z",
+          "totalTransactions": 1,
+          "totalAmount": 850000
         }
       ],
       "products": [
         {
           "id": 1724248572004,
-          "name": "Laptop Dell Inspiron",
+          "name": "Laptop Dell Inspiron 15",
           "price": 45000,
           "description": "Dell Inspiron 15 3000 Series, Intel Core i3, 4GB RAM, 1TB HDD",
           "hsn": "84713000",
           "category": "Electronics",
-          "createdAt": "2025-08-21T10:16:12.004Z"
+          "sku": "DELL-INS-15-001",
+          "stock": 25,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T10:16:12.004Z",
+          "lastUpdated": "2025-08-21T10:16:12.004Z",
+          "supplier": "Dell India",
+          "costPrice": 38000,
+          "marginPercent": 18.42
         },
         {
           "id": 1724248572005,
-          "name": "Office Chair",
+          "name": "Ergonomic Office Chair",
           "price": 8500,
-          "description": "Ergonomic office chair with lumbar support",
+          "description": "Ergonomic office chair with lumbar support and adjustable height",
           "hsn": "94013000",
           "category": "Furniture",
-          "createdAt": "2025-08-21T10:16:12.005Z"
+          "sku": "CHAIR-ERG-001",
+          "stock": 15,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T10:16:12.005Z",
+          "lastUpdated": "2025-08-21T10:16:12.005Z",
+          "supplier": "Office Furniture Co.",
+          "costPrice": 6500,
+          "marginPercent": 30.77
         },
         {
           "id": 1724248572006,
-          "name": "Printer HP LaserJet",
+          "name": "HP LaserJet Pro M404n",
           "price": 12000,
-          "description": "HP LaserJet Pro M404n Monochrome Laser Printer",
+          "description": "HP LaserJet Pro M404n Monochrome Laser Printer with network connectivity",
           "hsn": "84431900",
           "category": "Electronics",
-          "createdAt": "2025-08-21T10:16:12.006Z"
+          "sku": "HP-LJ-M404N",
+          "stock": 10,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T10:16:12.006Z",
+          "lastUpdated": "2025-08-21T10:16:12.006Z",
+          "supplier": "HP India",
+          "costPrice": 10200,
+          "marginPercent": 17.65
+        },
+        {
+          "id": 1724248572023,
+          "name": "Website Development Service",
+          "price": 50000,
+          "description": "Complete website development with responsive design and CMS",
+          "hsn": "998314",
+          "category": "Services",
+          "sku": "WEB-DEV-001",
+          "stock": 999,
+          "unit": "project",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T11:30:45.023Z",
+          "lastUpdated": "2025-08-21T11:30:45.023Z",
+          "serviceType": "digital",
+          "deliveryTime": "30 days"
+        },
+        {
+          "id": 1724248572024,
+          "name": "SEO Optimization Package",
+          "price": 15000,
+          "description": "3-month SEO optimization package with keyword research and analytics",
+          "hsn": "998314",
+          "category": "Services",
+          "sku": "SEO-PKG-001",
+          "stock": 999,
+          "unit": "package",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T11:30:45.024Z",
+          "lastUpdated": "2025-08-21T11:30:45.024Z",
+          "serviceType": "digital",
+          "deliveryTime": "90 days"
+        },
+        {
+          "id": 1724248572025,
+          "name": "Residential Property Construction",
+          "price": 4500,
+          "description": "Per sq.ft construction cost for residential properties",
+          "category": "Real Estate",
+          "sku": "PROP-RES-001",
+          "stock": 999,
+          "unit": "sq.ft",
+          "taxRate": 0,
+          "createdAt": "2025-08-21T15:46:12.025Z",
+          "lastUpdated": "2025-08-21T15:46:12.025Z",
+          "propertyType": "residential",
+          "location": "Faridabad"
+        },
+        {
+          "id": 1724248572026,
+          "name": "Premium Parking Space",
+          "price": 150000,
+          "description": "Covered parking space in premium residential complex",
+          "category": "Real Estate",
+          "sku": "PARK-PREM-001",
+          "stock": 50,
+          "unit": "space",
+          "taxRate": 0,
+          "createdAt": "2025-08-21T15:46:12.026Z",
+          "lastUpdated": "2025-08-21T15:46:12.026Z",
+          "propertyType": "parking",
+          "location": "Faridabad"
+        },
+        {
+          "id": 1724248572027,
+          "name": "Mobile App Development",
+          "price": 80000,
+          "description": "Native mobile app development for iOS and Android",
+          "hsn": "998314",
+          "category": "Services",
+          "sku": "APP-DEV-001",
+          "stock": 999,
+          "unit": "project",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T16:10:45.027Z",
+          "lastUpdated": "2025-08-21T16:10:45.027Z",
+          "serviceType": "digital",
+          "deliveryTime": "60 days"
         }
       ],
       "invoices": [
         {
           "id": 1724248572007,
           "type": "pos",
-          "invoiceNumber": "INV-202508-001",
-          "date": "21/Aug/2025",
+          "invoiceNumber": "INV-20250821-001",
+          "date": "21 Aug, 2025",
           "time": "10:16:12 AM",
           "customer": "Rajesh Kumar",
           "customerMobile": "+91 9876543210",
+          "customerEmail": "rajesh.kumar@business.com",
           "items": [
             {
-              "product": "Laptop Dell Inspiron",
+              "product": "Laptop Dell Inspiron 15",
               "quantity": 1,
               "rate": 45000,
               "amount": 45000
             },
             {
-              "product": "Office Chair",
+              "product": "Ergonomic Office Chair",
               "quantity": 2,
               "rate": 8500,
               "amount": 17000
@@ -100,27 +292,31 @@
             "tax": 11160,
             "total": 73160
           },
-          "createdAt": "2025-08-21T10:16:12.007Z"
+          "status": "paid",
+          "paymentMethod": "bank_transfer",
+          "createdAt": "2025-08-21T10:16:12.007Z",
+          "updatedAt": "2025-08-21T10:16:12.007Z"
         },
         {
           "id": 1724248572008,
           "type": "professional",
-          "invoiceNumber": "PROF-202508-001",
-          "date": "21/Aug/2025",
+          "invoiceNumber": "PROF-20250821-001",
+          "date": "21 Aug, 2025",
           "time": "11:30:45 AM",
           "customer": "Priya Sharma",
           "customerGst": "27FGHIJ5678K2A6",
           "customerAddress": "456 Park Street, Mumbai, Maharashtra 400001",
+          "customerEmail": "priya.sharma@startup.in",
           "items": [
             {
-              "description": "Website Development Services",
+              "description": "Website Development Service",
               "hsn": "998314",
               "quantity": 1,
               "rate": 50000,
               "amount": 50000
             },
             {
-              "description": "SEO Optimization",
+              "description": "SEO Optimization Package",
               "hsn": "998314",
               "quantity": 1,
               "rate": 15000,
@@ -133,49 +329,562 @@
             "sgst": 5850,
             "total": 76700
           },
-          "createdAt": "2025-08-21T11:30:45.008Z"
+          "status": "paid",
+          "paymentMethod": "upi",
+          "createdAt": "2025-08-21T11:30:45.008Z",
+          "updatedAt": "2025-08-21T11:30:45.008Z"
+        },
+        {
+          "id": 1724248572016,
+          "type": "realestate",
+          "invoiceNumber": "PROP-20250821-001",
+          "date": "21 Aug, 2025",
+          "time": "3:46:12 PM",
+          "customer": "Amit Patel",
+          "customerEmail": "amit.patel@realty.com",
+          "propertyType": "Residential",
+          "propertyAddress": "Sector 82, Faridabad, Haryana",
+          "items": [
+            {
+              "description": "Base Property Construction",
+              "unit": "1200 Sq.ft",
+              "rate": 4500,
+              "amount": 5400000
+            },
+            {
+              "description": "Premium Parking Space",
+              "unit": "2 Units",
+              "rate": 150000,
+              "amount": 300000
+            },
+            {
+              "description": "Club House Membership",
+              "unit": "1 Unit",
+              "rate": 99000,
+              "amount": 99000
+            }
+          ],
+          "totals": {
+            "subtotal": 5799000,
+            "registration": 115980,
+            "stamp": 289950,
+            "total": 6204930
+          },
+          "status": "pending",
+          "paymentMethod": "installments",
+          "createdAt": "2025-08-21T15:46:12.016Z",
+          "updatedAt": "2025-08-21T15:46:12.016Z"
+        },
+        {
+          "id": 1724248572028,
+          "type": "professional",
+          "invoiceNumber": "PROF-20250821-002",
+          "date": "21 Aug, 2025",
+          "time": "4:10:45 PM",
+          "customer": "Tech Solutions Pvt Ltd",
+          "customerGst": "06ABCDE1234F1Z8",
+          "customerAddress": "Corporate Tower, Gurgaon, Haryana 122001",
+          "customerEmail": "contact@techsolutions.in",
+          "items": [
+            {
+              "description": "Mobile App Development",
+              "hsn": "998314",
+              "quantity": 1,
+              "rate": 80000,
+              "amount": 80000
+            },
+            {
+              "description": "Website Development Service",
+              "hsn": "998314",
+              "quantity": 1,
+              "rate": 50000,
+              "amount": 50000
+            }
+          ],
+          "totals": {
+            "subtotal": 130000,
+            "cgst": 11700,
+            "sgst": 11700,
+            "total": 153400
+          },
+          "status": "draft",
+          "paymentMethod": "pending",
+          "createdAt": "2025-08-21T16:10:45.028Z",
+          "updatedAt": "2025-08-21T16:10:45.028Z"
         }
-      ]
+      ],
+      "analytics": {
+        "totalRevenue": 6507490,
+        "monthlyRevenue": 6507490,
+        "averageInvoiceValue": 1626872.5,
+        "topCustomer": "Amit Patel",
+        "topProduct": "Residential Property Construction",
+        "invoicesByStatus": {
+          "paid": 2,
+          "pending": 1,
+          "draft": 1
+        },
+        "invoicesByType": {
+          "pos": 1,
+          "professional": 2,
+          "realestate": 1
+        }
+      }
     },
-    "demo.free@gmail.com": {
+    "demo.premium@gmail.com": {
       "profile": {
-        "email": "demo.free@gmail.com",
-        "isPremium": false,
+        "id": 2,
+        "name": "Demo Premium",
+        "email": "demo.premium@gmail.com",
+        "password": "demo123",
+        "isPremium": true,
+        "role": "premium",
         "joinDate": "21/Aug/2025",
-        "lastLogin": "21/Aug/2025 2:15:30 PM",
-        "totalInvoices": 1
+        "lastLogin": "21/Aug/2025 3:30:15 PM IST",
+        "totalInvoices": 3,
+        "totalCustomers": 4,
+        "totalProducts": 6,
+        "preferences": {
+          "defaultInvoiceType": "pos",
+          "autoSave": true,
+          "notifications": true,
+          "theme": "light"
+        }
       },
       "customers": [
         {
-          "id": 1724248572009,
-          "name": "Suresh Singh",
-          "mobile": "+91 9876543213",
-          "address": "321 Market Street, Pune, Maharashtra 411001",
-          "createdAt": "2025-08-21T14:15:30.009Z"
+          "id": 1724248572029,
+          "name": "Rahul Enterprises",
+          "mobile": "+91 9876543230",
+          "email": "rahul@enterprises.com",
+          "address": "Trade Center, Chennai, Tamil Nadu 600001",
+          "gst": "33ABCDE1234F1Z9",
+          "city": "Chennai",
+          "state": "Tamil Nadu",
+          "pincode": "600001",
+          "customerType": "business",
+          "createdAt": "2025-08-21T15:30:15.029Z",
+          "lastTransaction": "2025-08-21T15:30:15.029Z",
+          "totalTransactions": 2,
+          "totalAmount": 95000
+        },
+        {
+          "id": 1724248572030,
+          "name": "Meera Singh",
+          "mobile": "+91 9876543231",
+          "email": "meera.singh@gmail.com",
+          "address": "Residential Area, Jaipur, Rajasthan 302001",
+          "city": "Jaipur",
+          "state": "Rajasthan",
+          "pincode": "302001",
+          "customerType": "individual",
+          "createdAt": "2025-08-21T15:30:15.030Z",
+          "lastTransaction": "2025-08-21T15:30:15.030Z",
+          "totalTransactions": 1,
+          "totalAmount": 35000
+        },
+        {
+          "id": 1724248572031,
+          "name": "Global Trading Co",
+          "mobile": "+91 9876543232",
+          "email": "info@globaltrading.in",
+          "address": "Business District, Kolkata, West Bengal 700001",
+          "gst": "19FGHIJ5678K2C0",
+          "city": "Kolkata",
+          "state": "West Bengal",
+          "pincode": "700001",
+          "customerType": "wholesale",
+          "createdAt": "2025-08-21T15:30:15.031Z",
+          "lastTransaction": "2025-08-21T15:30:15.031Z",
+          "totalTransactions": 1,
+          "totalAmount": 180000
+        },
+        {
+          "id": 1724248572032,
+          "name": "Home Decor Studio",
+          "mobile": "+91 9876543233",
+          "email": "contact@homedecor.com",
+          "address": "Design Complex, Indore, Madhya Pradesh 452001",
+          "gst": "23KLMNO9012L3D1",
+          "city": "Indore",
+          "state": "Madhya Pradesh",
+          "pincode": "452001",
+          "customerType": "retail",
+          "createdAt": "2025-08-21T15:30:15.032Z",
+          "lastTransaction": "2025-08-21T15:30:15.032Z",
+          "totalTransactions": 1,
+          "totalAmount": 42000
         }
       ],
       "products": [
         {
-          "id": 1724248572010,
-          "name": "Mobile Phone",
+          "id": 1724248572033,
+          "name": "Samsung Galaxy M32",
           "price": 15000,
-          "description": "Android smartphone",
+          "description": "Samsung Galaxy M32 smartphone with 6GB RAM and 128GB storage",
+          "hsn": "85171200",
           "category": "Electronics",
-          "createdAt": "2025-08-21T14:15:30.010Z"
+          "sku": "SAM-GAL-M32",
+          "stock": 20,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T15:30:15.033Z",
+          "lastUpdated": "2025-08-21T15:30:15.033Z",
+          "supplier": "Samsung India",
+          "costPrice": 12500,
+          "marginPercent": 20
+        },
+        {
+          "id": 1724248572034,
+          "name": "Wooden Dining Table",
+          "price": 25000,
+          "description": "6-seater wooden dining table with chairs",
+          "hsn": "94036000",
+          "category": "Furniture",
+          "sku": "WOOD-DIN-6S",
+          "stock": 5,
+          "unit": "set",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T15:30:15.034Z",
+          "lastUpdated": "2025-08-21T15:30:15.034Z",
+          "supplier": "Furniture Mart",
+          "costPrice": 18000,
+          "marginPercent": 38.89
+        },
+        {
+          "id": 1724248572035,
+          "name": "LED TV 43 inch",
+          "price": 35000,
+          "description": "43-inch Full HD LED Smart TV with Android",
+          "hsn": "85287200",
+          "category": "Electronics",
+          "sku": "LED-TV-43",
+          "stock": 12,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T15:30:15.035Z",
+          "lastUpdated": "2025-08-21T15:30:15.035Z",
+          "supplier": "Electronics Hub",
+          "costPrice": 28000,
+          "marginPercent": 25
+        },
+        {
+          "id": 1724248572036,
+          "name": "Air Conditioner 1.5 Ton",
+          "price": 40000,
+          "description": "1.5 Ton Split AC with 5-star energy rating",
+          "hsn": "84151000",
+          "category": "Appliances",
+          "sku": "AC-1.5T-5S",
+          "stock": 8,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T15:30:15.036Z",
+          "lastUpdated": "2025-08-21T15:30:15.036Z",
+          "supplier": "Appliance Store",
+          "costPrice": 32000,
+          "marginPercent": 25
+        },
+        {
+          "id": 1724248572037,
+          "name": "Graphic Design Service",
+          "price": 20000,
+          "description": "Complete branding and graphic design package",
+          "hsn": "998313",
+          "category": "Services",
+          "sku": "GFX-BRAND-001",
+          "stock": 999,
+          "unit": "project",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T15:30:15.037Z",
+          "lastUpdated": "2025-08-21T15:30:15.037Z",
+          "serviceType": "creative",
+          "deliveryTime": "15 days"
+        },
+        {
+          "id": 1724248572038,
+          "name": "Digital Marketing Package",
+          "price": 30000,
+          "description": "3-month digital marketing campaign with social media management",
+          "hsn": "998314",
+          "category": "Services",
+          "sku": "DIG-MKT-3M",
+          "stock": 999,
+          "unit": "package",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T15:30:15.038Z",
+          "lastUpdated": "2025-08-21T15:30:15.038Z",
+          "serviceType": "marketing",
+          "deliveryTime": "90 days"
         }
       ],
       "invoices": [
         {
-          "id": 1724248572011,
+          "id": 1724248572039,
           "type": "pos",
-          "invoiceNumber": "INV-202508-002",
-          "date": "21/Aug/2025",
-          "time": "2:15:30 PM",
-          "customer": "Suresh Singh",
-          "customerMobile": "+91 9876543213",
+          "invoiceNumber": "INV-20250821-002",
+          "date": "21 Aug, 2025",
+          "time": "3:30:15 PM",
+          "customer": "Meera Singh",
+          "customerMobile": "+91 9876543231",
+          "customerEmail": "meera.singh@gmail.com",
           "items": [
             {
-              "product": "Mobile Phone",
+              "product": "LED TV 43 inch",
+              "quantity": 1,
+              "rate": 35000,
+              "amount": 35000
+            }
+          ],
+          "totals": {
+            "subtotal": 35000,
+            "tax": 6300,
+            "total": 41300
+          },
+          "status": "paid",
+          "paymentMethod": "cash",
+          "createdAt": "2025-08-21T15:30:15.039Z",
+          "updatedAt": "2025-08-21T15:30:15.039Z"
+        },
+        {
+          "id": 1724248572040,
+          "type": "professional",
+          "invoiceNumber": "PROF-20250821-003",
+          "date": "21 Aug, 2025",
+          "time": "4:00:30 PM",
+          "customer": "Global Trading Co",
+          "customerGst": "19FGHIJ5678K2C0",
+          "customerAddress": "Business District, Kolkata, West Bengal 700001",
+          "customerEmail": "info@globaltrading.in",
+          "items": [
+            {
+              "description": "Graphic Design Service",
+              "hsn": "998313",
+              "quantity": 1,
+              "rate": 20000,
+              "amount": 20000
+            },
+            {
+              "description": "Digital Marketing Package",
+              "hsn": "998314",
+              "quantity": 1,
+              "rate": 30000,
+              "amount": 30000
+            }
+          ],
+          "totals": {
+            "subtotal": 50000,
+            "cgst": 4500,
+            "sgst": 4500,
+            "total": 59000
+          },
+          "status": "pending",
+          "paymentMethod": "bank_transfer",
+          "createdAt": "2025-08-21T16:00:30.040Z",
+          "updatedAt": "2025-08-21T16:00:30.040Z"
+        },
+        {
+          "id": 1724248572041,
+          "type": "pos",
+          "invoiceNumber": "INV-20250821-003",
+          "date": "21 Aug, 2025",
+          "time": "4:15:45 PM",
+          "customer": "Home Decor Studio",
+          "customerMobile": "+91 9876543233",
+          "customerEmail": "contact@homedecor.com",
+          "items": [
+            {
+              "product": "Samsung Galaxy M32",
+              "quantity": 2,
+              "rate": 15000,
+              "amount": 30000
+            },
+            {
+              "product": "Wooden Dining Table",
+              "quantity": 1,
+              "rate": 25000,
+              "amount": 25000
+            }
+          ],
+          "totals": {
+            "subtotal": 55000,
+            "tax": 9900,
+            "total": 64900
+          },
+          "status": "draft",
+          "paymentMethod": "pending",
+          "createdAt": "2025-08-21T16:15:45.041Z",
+          "updatedAt": "2025-08-21T16:15:45.041Z"
+        }
+      ],
+      "analytics": {
+        "totalRevenue": 165200,
+        "monthlyRevenue": 165200,
+        "averageInvoiceValue": 55066.67,
+        "topCustomer": "Home Decor Studio",
+        "topProduct": "LED TV 43 inch",
+        "invoicesByStatus": {
+          "paid": 1,
+          "pending": 1,
+          "draft": 1
+        },
+        "invoicesByType": {
+          "pos": 2,
+          "professional": 1,
+          "realestate": 0
+        }
+      }
+    },
+    "demo.free@gmail.com": {
+      "profile": {
+        "id": 3,
+        "name": "Demo Free User",
+        "email": "demo.free@gmail.com",
+        "password": "free123",
+        "isPremium": false,
+        "role": "free",
+        "joinDate": "21/Aug/2025",
+        "lastLogin": "21/Aug/2025 2:15:30 PM IST",
+        "totalInvoices": 2,
+        "totalCustomers": 3,
+        "totalProducts": 4,
+        "preferences": {
+          "defaultInvoiceType": "pos",
+          "autoSave": false,
+          "notifications": true,
+          "theme": "auto"
+        }
+      },
+      "customers": [
+        {
+          "id": 1724248572042,
+          "name": "Suresh Singh",
+          "mobile": "+91 9876543240",
+          "email": "suresh.singh@gmail.com",
+          "address": "321 Market Street, Pune, Maharashtra 411001",
+          "city": "Pune",
+          "state": "Maharashtra",
+          "pincode": "411001",
+          "customerType": "individual",
+          "createdAt": "2025-08-21T14:15:30.042Z",
+          "lastTransaction": "2025-08-21T14:15:30.042Z",
+          "totalTransactions": 1,
+          "totalAmount": 17700
+        },
+        {
+          "id": 1724248572043,
+          "name": "Local Shop",
+          "mobile": "+91 9876543241",
+          "email": "localshop@gmail.com",
+          "address": "Main Market, Lucknow, UP 226001",
+          "city": "Lucknow",
+          "state": "Uttar Pradesh",
+          "pincode": "226001",
+          "customerType": "retail",
+          "createdAt": "2025-08-21T14:15:30.043Z",
+          "lastTransaction": "2025-08-21T14:15:30.043Z",
+          "totalTransactions": 1,
+          "totalAmount": 23600
+        },
+        {
+          "id": 1724248572044,
+          "name": "Kavitha Nair",
+          "mobile": "+91 9876543242",
+          "email": "kavitha.nair@yahoo.com",
+          "address": "Residential Colony, Kochi, Kerala 682001",
+          "city": "Kochi",
+          "state": "Kerala",
+          "pincode": "682001",
+          "customerType": "individual",
+          "createdAt": "2025-08-21T14:15:30.044Z",
+          "lastTransaction": "2025-08-21T14:15:30.044Z",
+          "totalTransactions": 1,
+          "totalAmount": 11800
+        }
+      ],
+      "products": [
+        {
+          "id": 1724248572045,
+          "name": "Redmi Note 11",
+          "price": 15000,
+          "description": "Redmi Note 11 smartphone with 4GB RAM",
+          "hsn": "85171200",
+          "category": "Electronics",
+          "sku": "REDMI-N11",
+          "stock": 15,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T14:15:30.045Z",
+          "lastUpdated": "2025-08-21T14:15:30.045Z",
+          "supplier": "Mobile Store",
+          "costPrice": 12000,
+          "marginPercent": 25
+        },
+        {
+          "id": 1724248572046,
+          "name": "Bluetooth Headphones",
+          "price": 2500,
+          "description": "Wireless Bluetooth headphones with noise cancellation",
+          "hsn": "85183000",
+          "category": "Electronics",
+          "sku": "BT-HEAD-001",
+          "stock": 25,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T14:15:30.046Z",
+          "lastUpdated": "2025-08-21T14:15:30.046Z",
+          "supplier": "Electronics Store",
+          "costPrice": 1800,
+          "marginPercent": 38.89
+        },
+        {
+          "id": 1724248572047,
+          "name": "Power Bank 10000mAh",
+          "price": 1500,
+          "description": "Portable power bank with 10000mAh capacity",
+          "hsn": "85076000",
+          "category": "Electronics",
+          "sku": "PWR-BNK-10K",
+          "stock": 30,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T14:15:30.047Z",
+          "lastUpdated": "2025-08-21T14:15:30.047Z",
+          "supplier": "Accessory Hub",
+          "costPrice": 1000,
+          "marginPercent": 50
+        },
+        {
+          "id": 1724248572048,
+          "name": "Phone Case",
+          "price": 500,
+          "description": "Protective phone case with tempered glass",
+          "hsn": "39269099",
+          "category": "Accessories",
+          "sku": "PH-CASE-001",
+          "stock": 50,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T14:15:30.048Z",
+          "lastUpdated": "2025-08-21T14:15:30.048Z",
+          "supplier": "Accessory Store",
+          "costPrice": 300,
+          "marginPercent": 66.67
+        }
+      ],
+      "invoices": [
+        {
+          "id": 1724248572049,
+          "type": "pos",
+          "invoiceNumber": "INV-20250821-004",
+          "date": "21 Aug, 2025",
+          "time": "2:15:30 PM",
+          "customer": "Suresh Singh",
+          "customerMobile": "+91 9876543240",
+          "customerEmail": "suresh.singh@gmail.com",
+          "items": [
+            {
+              "product": "Redmi Note 11",
               "quantity": 1,
               "rate": 15000,
               "amount": 15000
@@ -186,97 +895,548 @@
             "tax": 2700,
             "total": 17700
           },
-          "createdAt": "2025-08-21T14:15:30.011Z"
+          "status": "paid",
+          "paymentMethod": "upi",
+          "createdAt": "2025-08-21T14:15:30.049Z",
+          "updatedAt": "2025-08-21T14:15:30.049Z"
+        },
+        {
+          "id": 1724248572050,
+          "type": "pos",
+          "invoiceNumber": "INV-20250821-005",
+          "date": "21 Aug, 2025",
+          "time": "3:45:20 PM",
+          "customer": "Local Shop",
+          "customerMobile": "+91 9876543241",
+          "customerEmail": "localshop@gmail.com",
+          "items": [
+            {
+              "product": "Bluetooth Headphones",
+              "quantity": 3,
+              "rate": 2500,
+              "amount": 7500
+            },
+            {
+              "product": "Power Bank 10000mAh",
+              "quantity": 2,
+              "rate": 1500,
+              "amount": 3000
+            },
+            {
+              "product": "Phone Case",
+              "quantity": 10,
+              "rate": 500,
+              "amount": 5000
+            }
+          ],
+          "totals": {
+            "subtotal": 15500,
+            "tax": 2790,
+            "total": 18290
+          },
+          "status": "pending",
+          "paymentMethod": "cash",
+          "createdAt": "2025-08-21T15:45:20.050Z",
+          "updatedAt": "2025-08-21T15:45:20.050Z"
         }
-      ]
+      ],
+      "analytics": {
+        "totalRevenue": 35990,
+        "monthlyRevenue": 35990,
+        "averageInvoiceValue": 17995,
+        "topCustomer": "Local Shop",
+        "topProduct": "Redmi Note 11",
+        "invoicesByStatus": {
+          "paid": 1,
+          "pending": 1,
+          "draft": 0
+        },
+        "invoicesByType": {
+          "pos": 2,
+          "professional": 0,
+          "realestate": 0
+        }
+      }
     },
-    "admin@pinvoices.com": {
+    "john.smith@business.com": {
       "profile": {
-        "email": "admin@pinvoices.com",
+        "id": 4,
+        "name": "John Smith",
+        "email": "john.smith@business.com",
+        "password": "john2025",
         "isPremium": true,
+        "role": "premium",
         "joinDate": "21/Aug/2025",
-        "lastLogin": "21/Aug/2025 3:46:12 PM",
+        "lastLogin": "21/Aug/2025 1:45:20 PM IST",
         "totalInvoices": 2,
-        "role": "admin"
+        "totalCustomers": 3,
+        "totalProducts": 5,
+        "preferences": {
+          "defaultInvoiceType": "professional",
+          "autoSave": true,
+          "notifications": false,
+          "theme": "dark"
+        }
       },
       "customers": [
         {
-          "id": 1724248572012,
-          "name": "ABC Enterprises",
-          "mobile": "+91 9876543214",
-          "address": "Corporate Office, Sector 62, Noida, UP 201301",
-          "gst": "09ABCDE1234F1Z5",
-          "createdAt": "2025-08-21T15:46:12.012Z"
+          "id": 1724248572051,
+          "name": "ABC Corp International",
+          "mobile": "+91 9876543250",
+          "email": "contact@abccorp.com",
+          "address": "Corporate Hub, Mumbai, Maharashtra 400001",
+          "gst": "27ABCDE1234F1A0",
+          "city": "Mumbai",
+          "state": "Maharashtra",
+          "pincode": "400001",
+          "customerType": "corporate",
+          "createdAt": "2025-08-21T13:45:20.051Z",
+          "lastTransaction": "2025-08-21T13:45:20.051Z",
+          "totalTransactions": 1,
+          "totalAmount": 118000
         },
         {
-          "id": 1724248572013,
-          "name": "XYZ Construction",
-          "mobile": "+91 9876543215",
-          "address": "Building No. 5, Industrial Area, Gurgaon, HR 122001",
-          "gst": "06FGHIJ5678K2A6",
-          "createdAt": "2025-08-21T15:46:12.013Z"
+          "id": 1724248572052,
+          "name": "Smith Consultancy",
+          "mobile": "+91 9876543251",
+          "email": "info@smithconsult.in",
+          "address": "Business Park, Bangalore, Karnataka 560001",
+          "gst": "29FGHIJ5678K2D2",
+          "city": "Bangalore",
+          "state": "Karnataka",
+          "pincode": "560001",
+          "customerType": "consultancy",
+          "createdAt": "2025-08-21T13:45:20.052Z",
+          "lastTransaction": "2025-08-21T13:45:20.052Z",
+          "totalTransactions": 1,
+          "totalAmount": 236000
+        },
+        {
+          "id": 1724248572053,
+          "name": "Wilson Properties",
+          "mobile": "+91 9876543252",
+          "email": "wilson@properties.com",
+          "address": "Real Estate Complex, Gurgaon, Haryana 122001",
+          "city": "Gurgaon",
+          "state": "Haryana",
+          "pincode": "122001",
+          "customerType": "realestate",
+          "createdAt": "2025-08-21T13:45:20.053Z",
+          "lastTransaction": "2025-08-21T13:45:20.053Z",
+          "totalTransactions": 1,
+          "totalAmount": 4500000
         }
       ],
       "products": [
         {
-          "id": 1724248572014,
-          "name": "Residential Apartment",
-          "price": 5500000,
-          "description": "3BHK Apartment in Premium Society",
-          "category": "Real Estate",
-          "unit": "Sq.ft",
-          "createdAt": "2025-08-21T15:46:12.014Z"
+          "id": 1724248572054,
+          "name": "Business Consulting Service",
+          "price": 100000,
+          "description": "Comprehensive business strategy and consulting service",
+          "hsn": "998319",
+          "category": "Services",
+          "sku": "BIZ-CONSULT-001",
+          "stock": 999,
+          "unit": "project",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T13:45:20.054Z",
+          "lastUpdated": "2025-08-21T13:45:20.054Z",
+          "serviceType": "consulting",
+          "deliveryTime": "90 days"
         },
         {
-          "id": 1724248572015,
-          "name": "Commercial Plot",
-          "price": 12000,
-          "description": "Commercial plot in prime location",
+          "id": 1724248572055,
+          "name": "Financial Audit Service",
+          "price": 75000,
+          "description": "Complete financial audit and compliance service",
+          "hsn": "998212",
+          "category": "Services",
+          "sku": "FIN-AUDIT-001",
+          "stock": 999,
+          "unit": "project",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T13:45:20.055Z",
+          "lastUpdated": "2025-08-21T13:45:20.055Z",
+          "serviceType": "financial",
+          "deliveryTime": "45 days"
+        },
+        {
+          "id": 1724248572056,
+          "name": "Legal Documentation",
+          "price": 25000,
+          "description": "Legal document preparation and review service",
+          "hsn": "998211",
+          "category": "Services",
+          "sku": "LEGAL-DOC-001",
+          "stock": 999,
+          "unit": "project",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T13:45:20.056Z",
+          "lastUpdated": "2025-08-21T13:45:20.056Z",
+          "serviceType": "legal",
+          "deliveryTime": "30 days"
+        },
+        {
+          "id": 1724248572057,
+          "name": "Commercial Property Valuation",
+          "price": 3500,
+          "description": "Per sq.ft commercial property valuation service",
           "category": "Real Estate",
-          "unit": "Sq.ft",
-          "createdAt": "2025-08-21T15:46:12.015Z"
+          "sku": "COMM-VAL-001",
+          "stock": 999,
+          "unit": "sq.ft",
+          "taxRate": 0,
+          "createdAt": "2025-08-21T13:45:20.057Z",
+          "lastUpdated": "2025-08-21T13:45:20.057Z",
+          "propertyType": "commercial",
+          "location": "Delhi NCR"
+        },
+        {
+          "id": 1724248572058,
+          "name": "Tax Planning Service",
+          "price": 50000,
+          "description": "Annual tax planning and optimization service",
+          "hsn": "998212",
+          "category": "Services",
+          "sku": "TAX-PLAN-001",
+          "stock": 999,
+          "unit": "annual",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T13:45:20.058Z",
+          "lastUpdated": "2025-08-21T13:45:20.058Z",
+          "serviceType": "tax",
+          "deliveryTime": "365 days"
         }
       ],
       "invoices": [
         {
-          "id": 1724248572016,
-          "type": "realestate",
-          "invoiceNumber": "PROP-202508-001",
-          "date": "21/Aug/2025",
-          "time": "3:46:12 PM",
-          "customer": "ABC Enterprises",
-          "propertyType": "Residential",
-          "propertyAddress": "Sector 82, Faridabad, Haryana",
+          "id": 1724248572059,
+          "type": "professional",
+          "invoiceNumber": "PROF-20250821-004",
+          "date": "21 Aug, 2025",
+          "time": "1:45:20 PM",
+          "customer": "ABC Corp International",
+          "customerGst": "27ABCDE1234F1A0",
+          "customerAddress": "Corporate Hub, Mumbai, Maharashtra 400001",
+          "customerEmail": "contact@abccorp.com",
           "items": [
             {
-              "description": "Base Property Cost",
-              "unit": "1200 Sq.ft",
-              "rate": 4500,
-              "amount": 5400000
-            },
-            {
-              "description": "Parking Space",
-              "unit": "2 Units",
-              "rate": 150000,
-              "amount": 300000
+              "description": "Business Consulting Service",
+              "hsn": "998319",
+              "quantity": 1,
+              "rate": 100000,
+              "amount": 100000
             }
           ],
           "totals": {
-            "subtotal": 5700000,
-            "registration": 114000,
-            "stamp": 285000,
-            "total": 6099000
+            "subtotal": 100000,
+            "cgst": 9000,
+            "sgst": 9000,
+            "total": 118000
           },
-          "createdAt": "2025-08-21T15:46:12.016Z"
+          "status": "paid",
+          "paymentMethod": "bank_transfer",
+          "createdAt": "2025-08-21T13:45:20.059Z",
+          "updatedAt": "2025-08-21T13:45:20.059Z"
+        },
+        {
+          "id": 1724248572060,
+          "type": "realestate",
+          "invoiceNumber": "PROP-20250821-002",
+          "date": "21 Aug, 2025",
+          "time": "2:30:45 PM",
+          "customer": "Wilson Properties",
+          "customerEmail": "wilson@properties.com",
+          "propertyType": "Commercial",
+          "propertyAddress": "Sector 44, Gurgaon, Haryana",
+          "items": [
+            {
+              "description": "Commercial Property Valuation",
+              "unit": "1200 Sq.ft",
+              "rate": 3500,
+              "amount": 4200000
+            },
+            {
+              "description": "Legal Documentation",
+              "unit": "1 Project",
+              "rate": 25000,
+              "amount": 25000
+            }
+          ],
+          "totals": {
+            "subtotal": 4225000,
+            "registration": 84500,
+            "stamp": 211250,
+            "total": 4520750
+          },
+          "status": "pending",
+          "paymentMethod": "installments",
+          "createdAt": "2025-08-21T14:30:45.060Z",
+          "updatedAt": "2025-08-21T14:30:45.060Z"
         }
-      ]
+      ],
+      "analytics": {
+        "totalRevenue": 4638750,
+        "monthlyRevenue": 4638750,
+        "averageInvoiceValue": 2319375,
+        "topCustomer": "Wilson Properties",
+        "topProduct": "Commercial Property Valuation",
+        "invoicesByStatus": {
+          "paid": 1,
+          "pending": 1,
+          "draft": 0
+        },
+        "invoicesByType": {
+          "pos": 0,
+          "professional": 1,
+          "realestate": 1
+        }
+      }
+    },
+    "sarah.wilson@company.in": {
+      "profile": {
+        "id": 5,
+        "name": "Sarah Wilson",
+        "email": "sarah.wilson@company.in",
+        "password": "sarah123",
+        "isPremium": true,
+        "role": "premium",
+        "joinDate": "21/Aug/2025",
+        "lastLogin": "21/Aug/2025 12:30:45 PM IST",
+        "totalInvoices": 1,
+        "totalCustomers": 2,
+        "totalProducts": 3,
+        "preferences": {
+          "defaultInvoiceType": "pos",
+          "autoSave": true,
+          "notifications": true,
+          "theme": "light"
+        }
+      },
+      "customers": [
+        {
+          "id": 1724248572061,
+          "name": "Fashion Boutique",
+          "mobile": "+91 9876543260",
+          "email": "info@fashionboutique.com",
+          "address": "Shopping Mall, Delhi 110001",
+          "gst": "07ABCDE1234F1B1",
+          "city": "Delhi",
+          "state": "Delhi",
+          "pincode": "110001",
+          "customerType": "retail",
+          "createdAt": "2025-08-21T12:30:45.061Z",
+          "lastTransaction": "2025-08-21T12:30:45.061Z",
+          "totalTransactions": 1,
+          "totalAmount": 59000
+        },
+        {
+          "id": 1724248572062,
+          "name": "Textile Exports Ltd",
+          "mobile": "+91 9876543261",
+          "email": "exports@textile.com",
+          "address": "Industrial Area, Tirupur, Tamil Nadu 641601",
+          "gst": "33FGHIJ5678K2E3",
+          "city": "Tirupur",
+          "state": "Tamil Nadu",
+          "pincode": "641601",
+          "customerType": "export",
+          "createdAt": "2025-08-21T12:30:45.062Z",
+          "lastTransaction": "2025-08-21T12:30:45.062Z",
+          "totalTransactions": 0,
+          "totalAmount": 0
+        }
+      ],
+      "products": [
+        {
+          "id": 1724248572063,
+          "name": "Designer Saree",
+          "price": 15000,
+          "description": "Handwoven silk designer saree with intricate embroidery",
+          "hsn": "50071000",
+          "category": "Textiles",
+          "sku": "SAR-DES-001",
+          "stock": 20,
+          "unit": "piece",
+          "taxRate": 5,
+          "createdAt": "2025-08-21T12:30:45.063Z",
+          "lastUpdated": "2025-08-21T12:30:45.063Z",
+          "supplier": "Silk Weavers Co.",
+          "costPrice": 10000,
+          "marginPercent": 50
+        },
+        {
+          "id": 1724248572064,
+          "name": "Cotton Fabric",
+          "price": 500,
+          "description": "Premium cotton fabric per meter",
+          "hsn": "52081000",
+          "category": "Textiles",
+          "sku": "COT-FAB-001",
+          "stock": 500,
+          "unit": "meter",
+          "taxRate": 5,
+          "createdAt": "2025-08-21T12:30:45.064Z",
+          "lastUpdated": "2025-08-21T12:30:45.064Z",
+          "supplier": "Cotton Mills",
+          "costPrice": 350,
+          "marginPercent": 42.86
+        },
+        {
+          "id": 1724248572065,
+          "name": "Fashion Design Service",
+          "price": 25000,
+          "description": "Custom fashion design and tailoring service",
+          "hsn": "998313",
+          "category": "Services",
+          "sku": "FASH-DES-001",
+          "stock": 999,
+          "unit": "project",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T12:30:45.065Z",
+          "lastUpdated": "2025-08-21T12:30:45.065Z",
+          "serviceType": "design",
+          "deliveryTime": "21 days"
+        }
+      ],
+      "invoices": [
+        {
+          "id": 1724248572066,
+          "type": "professional",
+          "invoiceNumber": "PROF-20250821-005",
+          "date": "21 Aug, 2025",
+          "time": "12:30:45 PM",
+          "customer": "Fashion Boutique",
+          "customerGst": "07ABCDE1234F1B1",
+          "customerAddress": "Shopping Mall, Delhi 110001",
+          "customerEmail": "info@fashionboutique.com",
+          "items": [
+            {
+              "description": "Designer Saree",
+              "hsn": "50071000",
+              "quantity": 2,
+              "rate": 15000,
+              "amount": 30000
+            },
+            {
+              "description": "Fashion Design Service",
+              "hsn": "998313",
+              "quantity": 1,
+              "rate": 25000,
+              "amount": 25000
+            }
+          ],
+          "totals": {
+            "subtotal": 55000,
+            "cgst": 2000,
+            "sgst": 2000,
+            "total": 59000
+          },
+          "status": "paid",
+          "paymentMethod": "credit_card",
+          "createdAt": "2025-08-21T12:30:45.066Z",
+          "updatedAt": "2025-08-21T12:30:45.066Z"
+        }
+      ],
+      "analytics": {
+        "totalRevenue": 59000,
+        "monthlyRevenue": 59000,
+        "averageInvoiceValue": 59000,
+        "topCustomer": "Fashion Boutique",
+        "topProduct": "Designer Saree",
+        "invoicesByStatus": {
+          "paid": 1,
+          "pending": 0,
+          "draft": 0
+        },
+        "invoicesByType": {
+          "pos": 0,
+          "professional": 1,
+          "realestate": 0
+        }
+      }
+    },
+    "newuser@example.com": {
+      "profile": {
+        "id": 6,
+        "name": "Test Free User",
+        "email": "newuser@example.com",
+        "password": "test123",
+        "isPremium": false,
+        "role": "free",
+        "joinDate": "21/Aug/2025",
+        "lastLogin": "21/Aug/2025 11:15:30 AM IST",
+        "totalInvoices": 0,
+        "totalCustomers": 1,
+        "totalProducts": 1,
+        "preferences": {
+          "defaultInvoiceType": "pos",
+          "autoSave": false,
+          "notifications": true,
+          "theme": "auto"
+        }
+      },
+      "customers": [
+        {
+          "id": 1724248572067,
+          "name": "Test Customer",
+          "mobile": "+91 9876543270",
+          "email": "test@customer.com",
+          "address": "Test Address, Test City 123456",
+          "city": "Test City",
+          "state": "Test State",
+          "pincode": "123456",
+          "customerType": "individual",
+          "createdAt": "2025-08-21T11:15:30.067Z",
+          "lastTransaction": null,
+          "totalTransactions": 0,
+          "totalAmount": 0
+        }
+      ],
+      "products": [
+        {
+          "id": 1724248572068,
+          "name": "Test Product",
+          "price": 1000,
+          "description": "Sample test product for demonstration",
+          "hsn": "12345678",
+          "category": "Test",
+          "sku": "TEST-001",
+          "stock": 10,
+          "unit": "piece",
+          "taxRate": 18,
+          "createdAt": "2025-08-21T11:15:30.068Z",
+          "lastUpdated": "2025-08-21T11:15:30.068Z",
+          "supplier": "Test Supplier",
+          "costPrice": 800,
+          "marginPercent": 25
+        }
+      ],
+      "invoices": [],
+      "analytics": {
+        "totalRevenue": 0,
+        "monthlyRevenue": 0,
+        "averageInvoiceValue": 0,
+        "topCustomer": null,
+        "topProduct": null,
+        "invoicesByStatus": {
+          "paid": 0,
+          "pending": 0,
+          "draft": 0
+        },
+        "invoicesByType": {
+          "pos": 0,
+          "professional": 0,
+          "realestate": 0
+        }
+      }
     }
   },
   "globalSettings": {
     "invoiceCounter": {
-      "INV": 2,
-      "PROF": 1,
-      "PROP": 1,
+      "INV": 5,
+      "PROF": 5,
+      "PROP": 2,
       "QUO": 0,
       "EST": 0,
       "REC": 0,
@@ -286,20 +1446,85 @@
       "gst": 18,
       "cgst": 9,
       "sgst": 9,
+      "igst": 18,
       "registration": 2,
-      "stampDuty": 5
+      "stampDuty": 5,
+      "textileTax": 5
     },
     "businessInfo": {
-      "name": "Pinvoices",
-      "version": "1.0 (Beta)",
+      "name": "UniBills",
+      "tagline": "Universal Invoice Management System",
+      "version": "1.0 Elite",
       "developer": "Anas Lila",
       "publisher": "AL Software",
-      "supportContact": "+91 8879706046"
+      "supportContact": "+91 8879706046",
+      "website": "https://unibills.com",
+      "email": "support@unibills.com"
+    },
+    "features": {
+      "maxFreeItems": 3,
+      "maxPremiumItems": 50,
+      "supportedInvoiceTypes": ["pos", "professional", "realestate", "quotation", "estimate", "receipt", "tax"],
+      "supportedCurrencies": ["INR"],
+      "supportedLanguages": ["en-IN"],
+      "dateFormat": "DD MMM, YYYY",
+      "timeFormat": "H:MM:SS AM/PM"
+    }
+  },
+  "analytics": {
+    "totalUsers": 6,
+    "premiumUsers": 3,
+    "freeUsers": 3,
+    "totalRevenue": 11406930,
+    "totalInvoices": 12,
+    "averageInvoiceValue": 950577.5,
+    "popularInvoiceTypes": {
+      "pos": 5,
+      "professional": 5,
+      "realestate": 2
+    },
+    "topPerformingUsers": [
+      {
+        "email": "anas.lila@example.com",
+        "revenue": 6507490,
+        "invoices": 4
+      },
+      {
+        "email": "john.smith@business.com",
+        "revenue": 4638750,
+        "invoices": 2
+      },
+      {
+        "email": "demo.premium@gmail.com",
+        "revenue": 165200,
+        "invoices": 3
+      }
+    ],
+    "monthlyGrowth": {
+      "newUsers": 6,
+      "newInvoices": 12,
+      "revenueGrowth": "100%"
     }
   },
   "backupInfo": {
-    "lastBackup": "21/Aug/2025 3:46:12 PM",
+    "lastBackup": "21/Aug/2025 4:14:00 PM IST",
+    "backupLocation": "secure_cloud_storage",
+    "backupStatus": "successful",
+    "nextScheduledBackup": "22/Aug/2025 4:14:00 PM IST",
     "autoBackup": true,
-    "retentionDays": 30
+    "retentionDays": 365,
+    "encryptionStatus": "AES-256 encrypted"
+  },
+  "systemStatus": {
+    "version": "1.0 Elite",
+    "lastSystemUpdate": "21/Aug/2025 4:14:00 PM IST",
+    "databaseIntegrity": "verified",
+    "performanceMetrics": {
+      "averageLoadTime": "1.2s",
+      "systemUptime": "99.9%",
+      "errorRate": "0.1%"
+    },
+    "securityStatus": "secure",
+    "complianceStatus": "GST compliant"
   }
 }
