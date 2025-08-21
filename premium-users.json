@@ -1,50 +1,229 @@
 {
-  "premiumUsers": [
-    "anas.lila@example.com",
-    "lilaanas6@gmail.com",
-    "admin@pinvoices.com",
-    "demo.premium@gmail.com"
-  ],
+  "version": "1.0 Elite",
+  "lastUpdated": "21/Aug/2025 4:12:00 PM IST",
+  "appName": "UniBills",
   "metadata": {
-    "version": "1.0",
-    "lastUpdated": "21/Aug/2025",
-    "totalPremiumUsers": 3,
-    "description": "Premium users database for Pinvoices application",
+    "description": "Premium users database for UniBills - Universal Invoice Management System",
+    "totalPremiumUsers": 5,
+    "developer": "Anas Lila",
+    "publisher": "AL Software",
+    "supportContact": "+91 8879706046",
     "instructions": {
-      "addUser": "Add email addresses to the premiumUsers array",
-      "removeUser": "Remove email addresses from the premiumUsers array",
+      "addUser": "Add user object with name, email, and password to the premiumUsers array",
+      "removeUser": "Remove user object from the premiumUsers array",
       "format": "All email addresses should be in lowercase",
-      "validation": "Ensure valid email format before adding"
+      "validation": "Ensure valid email format and secure passwords before adding",
+      "passwordPolicy": "Minimum 6 characters, recommended to use alphanumeric"
     }
   },
-  "purchaseHistory": [
+  "premiumUsers": [
     {
+      "id": 1,
+      "name": "Anas Lila",
       "email": "anas.lila@example.com",
-      "purchaseDate": "21/Aug/2025",
-      "amount": 599,
-      "transactionId": "TXN001",
-      "status": "completed"
+      "password": "admin123",
+      "role": "admin",
+      "joinDate": "21/Aug/2025",
+      "status": "active",
+      "features": ["all_access", "priority_support", "unlimited_invoices", "all_templates"]
     },
     {
-      "email": "admin@pinvoices.com",
-      "purchaseDate": "21/Aug/2025",
-      "amount": 0,
-      "transactionId": "ADMIN",
-      "status": "admin_access"
+      "id": 2,
+      "name": "Admin User",
+      "email": "admin@unibills.com",
+      "password": "admin123",
+      "role": "admin",
+      "joinDate": "21/Aug/2025",
+      "status": "active",
+      "features": ["all_access", "priority_support", "unlimited_invoices", "all_templates"]
     },
     {
+      "id": 3,
+      "name": "Demo Premium",
       "email": "demo.premium@gmail.com",
-      "purchaseDate": "21/Aug/2025",
-      "amount": 599,
-      "transactionId": "TXN002",
-      "status": "completed"
+      "password": "demo123",
+      "role": "premium",
+      "joinDate": "21/Aug/2025",
+      "status": "active",
+      "features": ["all_access", "priority_support", "unlimited_invoices", "all_templates"]
+    },
+    {
+      "id": 4,
+      "name": "John Smith",
+      "email": "john.smith@business.com",
+      "password": "john2025",
+      "role": "premium",
+      "joinDate": "21/Aug/2025",
+      "status": "active",
+      "features": ["all_access", "priority_support", "unlimited_invoices", "all_templates"]
+    },
+    {
+      "id": 5,
+      "name": "Sarah Wilson",
+      "email": "sarah.wilson@company.in",
+      "password": "sarah123",
+      "role": "premium",
+      "joinDate": "21/Aug/2025",
+      "status": "active",
+      "features": ["all_access", "priority_support", "unlimited_invoices", "all_templates"]
     }
   ],
-  "settings": {
-    "premiumPrice": 599,
+  "purchaseHistory": [
+    {
+      "transactionId": "UB001",
+      "userId": 1,
+      "email": "anas.lila@example.com",
+      "name": "Anas Lila",
+      "purchaseDate": "21/Aug/2025 4:12:00 PM IST",
+      "amount": 0,
+      "currency": "INR",
+      "paymentMethod": "admin_access",
+      "status": "completed",
+      "invoiceNumber": "UB-ADMIN-001",
+      "notes": "Developer access - lifetime premium"
+    },
+    {
+      "transactionId": "UB002",
+      "userId": 2,
+      "email": "admin@unibills.com",
+      "name": "Admin User",
+      "purchaseDate": "21/Aug/2025 4:12:00 PM IST",
+      "amount": 0,
+      "currency": "INR",
+      "paymentMethod": "admin_access",
+      "status": "completed",
+      "invoiceNumber": "UB-ADMIN-002",
+      "notes": "Admin access - lifetime premium"
+    },
+    {
+      "transactionId": "UB003",
+      "userId": 3,
+      "email": "demo.premium@gmail.com",
+      "name": "Demo Premium",
+      "purchaseDate": "21/Aug/2025 4:12:00 PM IST",
+      "amount": 599,
+      "currency": "INR",
+      "paymentMethod": "whatsapp_payment",
+      "status": "completed",
+      "invoiceNumber": "UB-PREM-003",
+      "notes": "Demo account - lifetime premium"
+    },
+    {
+      "transactionId": "UB004",
+      "userId": 4,
+      "email": "john.smith@business.com",
+      "name": "John Smith",
+      "purchaseDate": "21/Aug/2025 4:12:00 PM IST",
+      "amount": 599,
+      "currency": "INR",
+      "paymentMethod": "whatsapp_payment",
+      "status": "completed",
+      "invoiceNumber": "UB-PREM-004",
+      "notes": "Business user - lifetime premium"
+    },
+    {
+      "transactionId": "UB005",
+      "userId": 5,
+      "email": "sarah.wilson@company.in",
+      "name": "Sarah Wilson",
+      "purchaseDate": "21/Aug/2025 4:12:00 PM IST",
+      "amount": 599,
+      "currency": "INR",
+      "paymentMethod": "whatsapp_payment",
+      "status": "completed",
+      "invoiceNumber": "UB-PREM-005",
+      "notes": "Corporate user - lifetime premium"
+    }
+  ],
+  "pricingPlan": {
+    "planName": "UniBills Premium Lifetime",
+    "price": 599,
     "currency": "INR",
+    "billingCycle": "lifetime",
+    "features": [
+      "Unlimited invoice types (POS, Professional, Real Estate, Quotation, Estimate, Receipt, Tax Invoice)",
+      "Unlimited items per invoice",
+      "Advanced customer database management",
+      "Advanced product/inventory management",
+      "Professional invoice templates",
+      "Export & print functionality",
+      "Priority WhatsApp support",
+      "Offline functionality",
+      "Data backup & sync",
+      "Multi-device access",
+      "Custom branding options",
+      "Advanced reporting",
+      "GST compliance features",
+      "Real estate cost calculations",
+      "Auto-save & recovery"
+    ],
+    "limitations": {
+      "free": [
+        "POS invoices only",
+        "Maximum 3 items per invoice", 
+        "Basic customer database",
+        "Limited templates",
+        "Standard support"
+      ]
+    }
+  },
+  "settings": {
     "whatsappNumber": "+91 8879706046",
+    "supportEmail": "support@unibills.com",
+    "website": "https://unibills.com",
     "autoExpiry": false,
-    "lifetimeAccess": true
+    "lifetimeAccess": true,
+    "maxDevicesPerUser": 5,
+    "dataRetentionDays": 365,
+    "backupFrequency": "daily",
+    "securitySettings": {
+      "passwordMinLength": 6,
+      "sessionTimeout": 7200,
+      "multiDeviceLogin": true,
+      "passwordChangeRequired": false
+    }
+  },
+  "whatsappTemplates": {
+    "buyPremium": "I want to buy UniBills premium. Name: {name}, Email: {email}, User Type: {userType}, Request: BUY PREMIUM",
+    "changePassword": "I want to change my password. Name: {name}, Email: {email}, User Type: {userType}, Request: CHANGE PASSWORD",
+    "support": "Hello! I need support for UniBills. Name: {name}, Email: {email}, User Type: {userType}, Issue: {issue}",
+    "generalInquiry": "Hello! I have a question about UniBills. Name: {name}, Email: {email}, Message: {message}"
+  },
+  "analytics": {
+    "totalPremiumRevenue": 2396,
+    "averagePurchaseValue": 599,
+    "conversionRate": "pending_calculation",
+    "popularFeatures": [
+      "Professional Invoice",
+      "Real Estate Cost Sheet", 
+      "Unlimited Items",
+      "Customer Database",
+      "Export/Print"
+    ],
+    "userFeedback": {
+      "averageRating": 4.9,
+      "totalReviews": 0,
+      "commonPraise": [
+        "Easy to use interface",
+        "Great customer support",
+        "Comprehensive invoice features",
+        "Indian business compliance"
+      ]
+    }
+  },
+  "backupInfo": {
+    "lastBackup": "21/Aug/2025 4:12:00 PM IST",
+    "backupLocation": "secure_cloud_storage",
+    "backupStatus": "successful",
+    "nextScheduledBackup": "22/Aug/2025 4:12:00 PM IST",
+    "retentionPolicy": "Keep all premium user data for lifetime access"
+  },
+  "systemInfo": {
+    "databaseVersion": "1.0 Elite",
+    "lastSystemUpdate": "21/Aug/2025 4:12:00 PM IST",
+    "compatibilityVersion": "UniBills v1.0 Elite",
+    "encryptionLevel": "AES-256",
+    "dataIntegrity": "verified",
+    "systemStatus": "operational"
   }
 }
