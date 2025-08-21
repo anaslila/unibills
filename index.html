@@ -2,109 +2,328 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#667eea">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pinvoices</title>
+  <title>UniBills - Universal Invoice Management</title>
   <!-- Favicon -->
   <link rel="icon" href="https://i.postimg.cc/7636654Z/Untitled-design.png" type="image/png">
   <!-- Manifest and PWA meta -->
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Pinvoices">
+  <meta name="apple-mobile-web-app-title" content="UniBills">
   <!-- Apple Splash Icon -->
   <link rel="apple-touch-icon" href="https://i.postimg.cc/7636654Z/Untitled-design.png">
   <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Celebration Effect Container -->
+  <div id="celebration-container" class="celebration-container"></div>
+
   <!-- Glassy Top Bar -->
-  <header id="top-bar" class="glassy">
+  <header id="top-bar" class="glassy-header">
     <div class="brand-logo">
-      <img src="https://i.postimg.cc/7636654Z/Untitled-design.png" alt="Pinvoices Logo" height="36">
-      <span class="brand-name">Pinvoices</span>
+      <img src="https://i.postimg.cc/7636654Z/Untitled-design.png" alt="UniBills Logo" height="36">
+      <span class="brand-name">UniBills</span>
+      <span class="brand-tagline">Universal Invoicing</span>
     </div>
     <div class="top-bar-actions">
-      <button id="logout-btn" title="Logout" style="display:none">
+      <div id="user-info" class="user-info" style="display:none">
+        <span class="user-name"></span>
+        <span class="user-type"></span>
+      </div>
+      <button id="logout-btn" class="logout-button" title="Logout" style="display:none">
         <!-- SVG Logout Icon -->
-        <svg width="24" height="24" viewBox="0 0 24 24"><path d="M16 13v-2H7V8l-5 4 5 4v-3zm9-7v14c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-5h2v5h14V4H5V9H3V4c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2z"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16 13v-2H7V8l-5 4 5 4v-3zm9-7v14c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-5h2v5h14V4H5V9H3V4c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2z"/>
+        </svg>
+        <span>Logout</span>
       </button>
     </div>
   </header>
 
-  <!-- Login Modal -->
-  <div id="login-modal" class="modal glassy show">
-    <form id="login-form" autocomplete="off">
-      <h2>Login to Pinvoices</h2>
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <input type="email" id="login-email" required placeholder="your@email.com">
-        <small>For premium or free access</small>
+  <!-- Enhanced Login Modal -->
+  <div id="login-modal" class="modal glassy-modal show">
+    <div class="login-container">
+      <div class="login-header">
+        <img src="https://i.postimg.cc/7636654Z/Untitled-design.png" alt="UniBills Logo" class="login-logo">
+        <h2>Welcome to UniBills</h2>
+        <p>Universal Invoice Management System</p>
       </div>
-      <button type="submit" class="primary-btn">Login</button>
-    </form>
-    <div id="premium-info" style="display:none">
-      <div class="premium-status glassy">
-        You are logged in as Premium user!
+      
+      <form id="login-form" class="login-form" autocomplete="off">
+        <div class="form-group">
+          <label for="user-name">Full Name</label>
+          <input type="text" id="login-name" required placeholder="Enter your full name">
+          <div class="input-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="user-email">Email Address</label>
+          <input type="email" id="login-email" required placeholder="your@email.com">
+          <div class="input-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="user-password">Password</label>
+          <input type="password" id="login-password" required placeholder="Enter your password">
+          <div class="input-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+            </svg>
+          </div>
+          <small class="password-hint">Can't change password? <a href="#" id="change-password-link">Request change</a></small>
+        </div>
+        
+        <button type="submit" class="primary-btn login-btn">
+          <span class="btn-text">Login to UniBills</span>
+          <div class="btn-loader" style="display:none">
+            <div class="spinner"></div>
+          </div>
+        </button>
+      </form>
+
+      <!-- Status Messages -->
+      <div id="premium-info" class="status-card premium-status" style="display:none">
+        <div class="status-icon premium-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <div class="status-content">
+          <h3>Premium Account!</h3>
+          <p>Welcome back! You have full access to all UniBills features.</p>
+        </div>
       </div>
-    </div>
-    <div id="nonpremium-info" style="display:none">
-      <div class="premium-status glassy">
-        You are logged in as Free user.<br>Upgrade for unlimited invoices and items.
-        <a id="buy-premium-btn" class="whatsapp-link" href="#" target="_blank">Buy Premium (₹599 Lifetime)</a>
+      
+      <div id="free-info" class="status-card free-status" style="display:none">
+        <div class="status-icon free-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+        </div>
+        <div class="status-content">
+          <h3>Free Account</h3>
+          <p>Basic POS invoices available. Upgrade for full features!</p>
+          <a id="buy-premium-btn" class="upgrade-link" href="#" target="_blank">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7.58 4.08L6.15 2.65C3.75 4.48 2.17 7.3 2.03 10.5h2c.15-2.65 1.51-4.97 3.55-6.42zm12.39 6.42h2c-.15-3.2-1.73-6.02-4.12-7.85l-1.42 1.43c2.02 1.45 3.39 3.77 3.54 6.42zM18 11c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2v-5zm-6 11c.14 0 .27-.01.4-.04.65-.14 1.18-.58 1.44-1.18.1-.24.15-.5.15-.78h-4c.01 1.1.9 2 2.01 2z"/>
+            </svg>
+            Upgrade to Premium - ₹599 Lifetime
+          </a>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Main APP, hidden until login -->
-  <main id="app-container" style="display:none">
-    <nav id="main-tabs" class="glassy-tabs">
-      <button data-tab="pos" class="tab-btn active"><span class="icon"><!-- POS SVG --></span>POS Invoice</button>
-      <button data-tab="professional" class="tab-btn"><span class="icon"><!-- Professional SVG --></span>Professional Invoice</button>
-      <button data-tab="realestate" class="tab-btn"><span class="icon"><!-- Real Estate SVG --></span>Real Estate Invoice</button>
-      <button data-tab="more" class="tab-btn"><span class="icon"><!-- More SVG --></span>More</button>
-      <button data-tab="settings" class="tab-btn"><span class="icon"><!-- Settings SVG --></span>Settings</button>
+  <main id="app-container" class="app-container" style="display:none">
+    <!-- Enhanced Navigation Tabs -->
+    <nav id="main-tabs" class="navigation-tabs">
+      <button data-tab="pos" class="nav-tab active">
+        <div class="tab-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 4h16v2H4zm0 5h16v10H4z"/>
+          </svg>
+        </div>
+        <span class="tab-label">POS Invoice</span>
+        <div class="tab-indicator"></div>
+      </button>
+      
+      <button data-tab="professional" class="nav-tab">
+        <div class="tab-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+          </svg>
+        </div>
+        <span class="tab-label">Professional</span>
+        <div class="tab-indicator"></div>
+      </button>
+      
+      <button data-tab="realestate" class="nav-tab">
+        <div class="tab-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+          </svg>
+        </div>
+        <span class="tab-label">Real Estate</span>
+        <div class="tab-indicator"></div>
+      </button>
+      
+      <button data-tab="more" class="nav-tab">
+        <div class="tab-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+          </svg>
+        </div>
+        <span class="tab-label">More Features</span>
+        <div class="tab-indicator"></div>
+      </button>
+      
+      <button data-tab="settings" class="nav-tab">
+        <div class="tab-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+          </svg>
+        </div>
+        <span class="tab-label">Settings</span>
+        <div class="tab-indicator"></div>
+      </button>
     </nav>
 
     <!-- POS Invoice Tab -->
-    <section id="pos-tab" class="tab-content active glassy">
-      <h2>POS Invoice</h2>
-      <!-- Invoice Form here -->
+    <section id="pos-tab" class="tab-content active">
+      <div class="content-header">
+        <h2>Point of Sale Invoice</h2>
+        <p>Quick and easy invoice generation for retail transactions</p>
+      </div>
+      <!-- Content will be populated by JavaScript -->
     </section>
+
     <!-- Professional Invoice Tab -->
-    <section id="professional-tab" class="tab-content glassy hide">
-      <h2>Professional Invoice</h2>
-      <!-- Invoice Form here -->
+    <section id="professional-tab" class="tab-content">
+      <div class="content-header">
+        <h2>Professional Invoice</h2>
+        <p>GST compliant invoices for business transactions</p>
+      </div>
+      <!-- Content will be populated by JavaScript -->
     </section>
+
     <!-- Real Estate Invoice Tab -->
-    <section id="realestate-tab" class="tab-content glassy hide">
-      <h2>Real Estate Invoice (Costsheet)</h2>
-      <!-- Invoice Form here -->
+    <section id="realestate-tab" class="tab-content">
+      <div class="content-header">
+        <h2>Real Estate Invoice</h2>
+        <p>Comprehensive cost sheets for property transactions</p>
+      </div>
+      <!-- Content will be populated by JavaScript -->
     </section>
+
     <!-- More Invoice Features Tab -->
-    <section id="more-tab" class="tab-content glassy hide">
-      <h2>More Invoice Features</h2>
-      <!-- Additional invoice types/forms -->
+    <section id="more-tab" class="tab-content">
+      <div class="content-header">
+        <h2>Additional Features</h2>
+        <p>Extended invoice types and advanced functionality</p>
+      </div>
+      <!-- Content will be populated by JavaScript -->
     </section>
-    <!-- Settings Tab -->
-    <section id="settings-tab" class="tab-content glassy hide">
-      <h2>Settings</h2>
-      <div>
-        <strong>Pinvoices v1.0 (Beta)</strong><br>
-        Developer: Anas Lila<br>
-        Published By: AL Software<br>
-        Last Updated On: <span id="last-updated"></span>
+
+    <!-- Enhanced Settings Tab -->
+    <section id="settings-tab" class="tab-content">
+      <div class="content-header">
+        <h2>Application Settings</h2>
+        <p>Manage your account and application preferences</p>
+      </div>
+      
+      <div class="settings-grid">
+        <div class="setting-card">
+          <div class="setting-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          <div class="setting-content">
+            <h3>Account Information</h3>
+            <div class="info-row">
+              <span class="label">Name:</span>
+              <span class="value" id="settings-user-name">-</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Email:</span>
+              <span class="value" id="settings-user-email">-</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Account Type:</span>
+              <span class="value" id="settings-user-type">-</span>
+            </div>
+            <button class="setting-btn" id="change-password-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+              </svg>
+              Change Password
+            </button>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+          </div>
+          <div class="setting-content">
+            <h3>Application Details</h3>
+            <div class="info-row">
+              <span class="label">Version:</span>
+              <span class="value version-badge">1.0 Elite</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Developer:</span>
+              <span class="value">Anas Lila</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Published By:</span>
+              <span class="value">AL Software</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Last Updated:</span>
+              <span class="value" id="last-updated">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H4V8h16v12zm-8-9v2h2v2h-2v2H8v-2H6v-2h2V9h4z"/>
+            </svg>
+          </div>
+          <div class="setting-content">
+            <h3>Support & Contact</h3>
+            <div class="info-row">
+              <span class="label">WhatsApp Support:</span>
+              <span class="value">+91 8879706046</span>
+            </div>
+            <div class="support-buttons">
+              <a href="#" id="support-btn" class="setting-btn support-btn" target="_blank">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.488"/>
+                </svg>
+                Contact Support
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
-  <!-- Customer / Inventory Modals -->
-  <div id="add-customer-modal" class="modal glassy hide">
-    <!-- Add Customer Form -->
+  <!-- Enhanced Modals -->
+  <div id="add-customer-modal" class="modal enhanced-modal" style="display:none">
+    <!-- Customer form will be populated by JavaScript -->
   </div>
-  <div id="add-product-modal" class="modal glassy hide">
-    <!-- Add Product Form -->
+  
+  <div id="add-product-modal" class="modal enhanced-modal" style="display:none">
+    <!-- Product form will be populated by JavaScript -->
   </div>
-  <!-- Icons and scripts -->
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen" style="display:none">
+    <div class="loading-content">
+      <img src="https://i.postimg.cc/7636654Z/Untitled-design.png" alt="UniBills Logo" class="loading-logo">
+      <div class="loading-spinner"></div>
+      <p>Loading UniBills...</p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script src="script.js"></script>
 </body>
 </html>
