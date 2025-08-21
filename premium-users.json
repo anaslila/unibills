@@ -68,6 +68,16 @@
       "features": ["all_access", "priority_support", "unlimited_invoices", "all_templates"]
     }
   ],
+  {
+  "id": 7,
+  "name": "Anas",
+  "email": "lilaanas6@gmail.com",
+  "password": "anas123",
+  "role": "premium",
+  "joinDate": "21/Aug/2025",
+  "status": "active",
+  "features": ["all_access", "priority_support", "unlimited_invoices", "all_templates"]
+}
   "purchaseHistory": [
     {
       "transactionId": "UB001",
