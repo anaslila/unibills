@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bills — Invoice & Inventory</title>
+  <title>UniBills — Bills | Invoicing & Inventory</title>
   <link rel="icon" type="image/png" href="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/66ebc497-6808-43ba-9d7e-36e671267b46.png" />
   <link rel="stylesheet" href="styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700;800&display=swap" rel="stylesheet" />
@@ -20,21 +20,12 @@
         <span class="logo-text">Bills</span>
       </div>
       <div class="nav-menu">
-        <a href="#dashboard" class="nav-link active" data-section="dashboard">
-          <i class="fas fa-chart-pie"></i><span>Dashboard</span>
-        </a>
-        <a href="#invoices" class="nav-link" data-section="invoices">
-          <i class="fas fa-file-invoice"></i><span>Invoices</span>
-        </a>
-        <a href="#inventory" class="nav-link" data-section="inventory">
-          <i class="fas fa-boxes"></i><span>Inventory</span>
-        </a>
-        <a href="#clients" class="nav-link" data-section="clients">
-          <i class="fas fa-users"></i><span>Clients</span>
-        </a>
-        <a href="#settings" class="nav-link" data-section="settings">
-          <i class="fas fa-cog"></i><span>Settings</span>
-        </a>
+        <a href="#dashboard" class="nav-link active" data-section="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
+        <a href="#invoices" class="nav-link" data-section="invoices"><i class="fas fa-file-invoice"></i><span>Invoices</span></a>
+        <a href="#inventory" class="nav-link" data-section="inventory"><i class="fas fa-boxes"></i><span>Inventory</span></a>
+        <a href="#clients" class="nav-link" data-section="clients"><i class="fas fa-users"></i><span>Clients</span></a>
+        <a href="#reports" class="nav-link" data-section="reports"><i class="fas fa-chart-line"></i><span>Reports</span></a>
+        <a href="#settings" class="nav-link" data-section="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
       </div>
     </nav>
   </header>
@@ -53,33 +44,33 @@
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
           <div class="stat-content">
-            <h3 class="stat-number">₹0</h3>
+            <h3 class="stat-number" id="statRevenue">₹0</h3>
             <p class="stat-label">Total Revenue</p>
-            <span class="stat-change positive"><i class="fas fa-arrow-up"></i>—</span>
+            <span class="stat-change positive"><i class="fas fa-arrow-up"></i><span id="statRevChange">—</span></span>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
           <div class="stat-content">
-            <h3 class="stat-number">0</h3>
+            <h3 class="stat-number" id="statInvoices">0</h3>
             <p class="stat-label">Total Invoices</p>
-            <span class="stat-change positive"><i class="fas fa-arrow-up"></i>—</span>
+            <span class="stat-change positive"><i class="fas fa-arrow-up"></i><span id="statInvChange">—</span></span>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-clock"></i></div>
           <div class="stat-content">
-            <h3 class="stat-number">₹0</h3>
+            <h3 class="stat-number" id="statPending">₹0</h3>
             <p class="stat-label">Pending Amount</p>
-            <span class="stat-change negative"><i class="fas fa-arrow-down"></i>—</span>
+            <span class="stat-change negative"><i class="fas fa-arrow-down"></i><span id="statPendChange">—</span></span>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-boxes"></i></div>
           <div class="stat-content">
-            <h3 class="stat-number">0</h3>
+            <h3 class="stat-number" id="statStock">0</h3>
             <p class="stat-label">Units in Stock</p>
-            <span class="stat-change positive"><i class="fas fa-arrow-up"></i>—</span>
+            <span class="stat-change positive"><i class="fas fa-arrow-up"></i><span id="statStockChange">—</span></span>
           </div>
         </div>
       </div>
@@ -105,9 +96,9 @@
             <div class="card-content">
               <div class="action-grid">
                 <button class="quick-action-btn" id="quickInvoice"><i class="fas fa-plus-circle"></i><span>New Invoice</span></button>
-                <button class="quick-action-btn" id="addClient"><i class="fas fa-user-plus"></i><span>Add Client</span></button>
-                <button class="quick-action-btn" id="addProduct"><i class="fas fa-box"></i><span>Add Product</span></button>
                 <button class="quick-action-btn" id="viewReports"><i class="fas fa-chart-bar"></i><span>View Reports</span></button>
+                <button class="quick-action-btn" id="qaDisabled1" title="Unavailable"><i class="fas fa-user-plus"></i><span>Coming Soon</span></button>
+                <button class="quick-action-btn" id="qaDisabled2" title="Unavailable"><i class="fas fa-box"></i><span>Coming Soon</span></button>
               </div>
             </div>
           </div>
@@ -131,11 +122,6 @@
             <option value="pending">Pending</option>
             <option value="overdue">Overdue</option>
           </select>
-          <!-- Tax controls live in Invoices (global default) -->
-          <div class="tax-settings" title="Default tax settings for new invoices">
-            <input type="number" min="0" step="0.01" id="taxRateInput" placeholder="Tax %" />
-            <label><input type="checkbox" id="taxIncludedCheckbox" /> Include Tax in Price</label>
-          </div>
           <button class="btn btn-primary" id="newInvoiceBtn"><i class="fas fa-plus"></i>New Invoice</button>
         </div>
       </div>
@@ -167,7 +153,6 @@
       <div class="section-header">
         <h1 class="section-title"><i class="fas fa-boxes"></i> Inventory</h1>
         <div class="section-actions">
-          <!-- Premium Search -->
           <div class="search-box search-elevated" role="search">
             <i class="fas fa-search"></i>
             <input type="text" id="productSearch" class="search-input" placeholder="Search inventory by name, category, unit..." aria-label="Search inventory" />
@@ -180,9 +165,9 @@
       </div>
 
       <div class="inventory-stats">
-        <div class="inventory-stat"><i class="fas fa-box"></i><div><h3>0</h3><p>Units in Stock</p></div></div>
-        <div class="inventory-stat"><i class="fas fa-exclamation-triangle"></i><div><h3>0</h3><p>Low Stock</p></div></div>
-        <div class="inventory-stat"><i class="fas fa-times-circle"></i><div><h3>0</h3><p>Out of Stock</p></div></div>
+        <div class="inventory-stat"><i class="fas fa-box"></i><div><h3 id="stockUnits">0</h3><p>Units in Stock</p></div></div>
+        <div class="inventory-stat"><i class="fas fa-exclamation-triangle"></i><div><h3 id="lowStock">0</h3><p>Low Stock</p></div></div>
+        <div class="inventory-stat"><i class="fas fa-times-circle"></i><div><h3 id="outStock">0</h3><p>Out of Stock</p></div></div>
       </div>
 
       <div class="card">
@@ -195,7 +180,6 @@
       <div class="section-header">
         <h1 class="section-title"><i class="fas fa-users"></i> Clients</h1>
         <div class="section-actions">
-          <!-- Premium Search -->
           <div class="search-box search-elevated" role="search">
             <i class="fas fa-search"></i>
             <input type="text" id="clientSearch" class="search-input" placeholder="Search clients by name, phone, email..." aria-label="Search clients" />
@@ -209,6 +193,49 @@
 
       <div class="card">
         <div class="client-grid" id="clientGrid"></div>
+      </div>
+    </section>
+
+    <!-- Reports (full page) -->
+    <section id="reports-section" class="content-section">
+      <div class="section-header">
+        <h1 class="section-title"><i class="fas fa-chart-line"></i> Reports & Analytics</h1>
+      </div>
+      <div class="stats-grid" id="reportsTop">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+          <div>
+            <h3 class="stat-number" id="repRevenue">₹0</h3>
+            <p class="stat-label">Revenue (All Time)</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+          <div>
+            <h3 class="stat-number" id="repPending">₹0</h3>
+            <p class="stat-label">Pending (All Time)</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+          <div>
+            <h3 class="stat-number" id="repCount">0</h3>
+            <p class="stat-label">Invoices Count</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-layer-group"></i> Status Breakdown</h2>
+        </div>
+        <div class="card-content" style="padding:18px;">
+          <div style="display:flex;gap:16px;flex-wrap:wrap;">
+            <div class="inventory-stat"><i class="fas fa-check-circle"></i><div><h3 id="repPaid">0</h3><p>Paid</p></div></div>
+            <div class="inventory-stat"><i class="fas fa-clock"></i><div><h3 id="repPendCount">0</h3><p>Pending</p></div></div>
+            <div class="inventory-stat"><i class="fas fa-exclamation-circle"></i><div><h3 id="repOverdue">0</h3><p>Overdue</p></div></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -263,38 +290,93 @@
         </div>
 
         <div class="settings-card">
-          <h2><i class="fas fa-palette"></i> Appearance & Version</h2>
-          <div class="appearance-options">
-            <div class="theme-selector">
-              <label>Theme</label>
-              <select class="form-input" id="themeSelector">
-                <option>Light</option>
-                <option>Dark</option>
-                <option>Auto</option>
-              </select>
-            </div>
-          </div>
-          <div class="version-info">
-            <p><strong>Version:</strong> 1.0.9265C</p>
-            <p><strong>Build:</strong> August, 2025</p>
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h2><i class="fab fa-whatsapp"></i> WhatsApp Integration</h2>
-          <div class="whatsapp-settings">
-            <div class="form-group">
-              <label>WhatsApp Business Number</label>
-              <input type="tel" id="whatsappNumber" placeholder="+91 9876543210" class="form-input" />
-            </div>
-            <button class="btn btn-success" id="connectWhatsappBtn"><i class="fab fa-whatsapp"></i>Connect WhatsApp</button>
+          <h2><i class="fas fa-info-circle"></i> About</h2>
+          <div class="about-info">
+            <p><strong>Developer:</strong> UniBills Team</p>
+            <p><strong>Version:</strong> 1.0.959X-Pro</p>
+            <p><strong>Build:</strong> September, 2025</p>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- Client Details (full page edit) -->
+    <section id="client-details-section" class="content-section">
+      <div class="section-header">
+        <h1 class="section-title"><i class="fas fa-user"></i> Client Details</h1>
+        <div class="section-actions">
+          <button class="btn btn-secondary" id="backToClients"><i class="fas fa-arrow-left"></i>Back to Clients</button>
+        </div>
+      </div>
+      <div class="card" style="padding:20px;">
+        <form id="clientDetailsForm" class="settings-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Client Name</label>
+              <input type="text" id="cd_name" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="tel" id="cd_phone" class="form-input" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="cd_email" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>Address</label>
+              <input type="text" id="cd_address" class="form-input" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i>Save Client</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Inventory Details (full page edit) -->
+    <section id="inventory-details-section" class="content-section">
+      <div class="section-header">
+        <h1 class="section-title"><i class="fas fa-box-open"></i> Inventory Details</h1>
+        <div class="section-actions">
+          <button class="btn btn-secondary" id="backToInventory"><i class="fas fa-arrow-left"></i>Back to Inventory</button>
+        </div>
+      </div>
+      <div class="card" style="padding:20px;">
+        <form id="productDetailsForm" class="settings-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Product Name</label>
+              <input type="text" id="pd_name" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <input type="text" id="pd_category" class="form-input" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Unit (pcs/kg/ltr/service)</label>
+              <input type="text" id="pd_unit" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>Price (per unit)</label>
+              <input type="number" id="pd_price" class="form-input" min="0" step="0.01" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Stock</label>
+            <input type="number" id="pd_stock" class="form-input" min="0" />
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i>Save Product</button>
+        </form>
+      </div>
+    </section>
+
   </main>
 
-  <!-- Create/Edit Invoice Modal -->
+  <!-- Create Invoice Modal (with per-invoice Tax) -->
   <div class="modal" id="invoiceModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -318,7 +400,7 @@
             </div>
           </div>
 
-          <!-- Single-line item entry -->
+          <!-- Single-line items -->
           <div class="invoice-items">
             <h3>Items</h3>
             <div class="item-row">
@@ -335,22 +417,45 @@
               </div>
             </div>
           </div>
-
           <button type="button" class="btn btn-secondary" id="addItemBtn"><i class="fas fa-plus"></i>Add Item</button>
 
+          <!-- Per-invoice Tax + Discount -->
           <div class="invoice-summary">
-            <div class="summary-row"><span>Subtotal:</span><span id="subtotal">₹0</span></div>
-            <div class="summary-row tax-discount">
-              <label>Discount (%) <input type="number" id="discountInput" min="0" max="100" step="0.1" value="0" style="width:80px;margin-left:8px" /></label>
+            <div class="summary-row">
+              <span>Subtotal:</span><span id="subtotal">₹0</span>
             </div>
+
             <div class="summary-row tax-discount">
-              <label>Other Tax (%) <input type="number" id="otherTaxInput" min="0" max="100" step="0.1" value="0" style="width:80px;margin-left:8px" /></label>
+              <label>Discount Mode</label>
+              <select id="discountMode" class="form-input" style="width:150px;margin-left:8px;">
+                <option value="PERCENT">Percent (%)</option>
+                <option value="AMOUNT">Amount (Rs)</option>
+              </select>
+              <label>
+                Discount (%)
+                <input type="number" id="discountInputPercent" min="0" max="100" step="0.1" value="0" style="width:90px;margin-left:8px" />
+              </label>
+              <label>
+                Discount (Rs)
+                <input type="number" id="discountInputAmount" min="0" step="0.01" value="0" style="width:120px;margin-left:8px" />
+              </label>
             </div>
-            <div class="summary-row"><span>Tax:</span><span id="tax">₹0</span></div>
-            <div class="summary-row total"><span>Total:</span><span id="total">₹0</span></div>
+
+            <div class="summary-row tax-discount">
+              <label>Tax (%) <input type="number" id="invoiceTaxPct" min="0" step="0.01" value="18" style="width:90px;margin-left:8px" /></label>
+              <label><input type="checkbox" id="invoiceTaxIncluded" /> Include Tax in Price</label>
+            </div>
+
+            <div class="summary-row">
+              <span>Tax:</span><span id="tax">₹0</span>
+            </div>
+            <div class="summary-row total">
+              <span>Total:</span><span id="total">₹0</span>
+            </div>
+
             <div class="summary-row">
               <label for="paymentModeSelect">Payment Mode</label>
-              <select id="paymentModeSelect" class="form-input" style="width: 170px; margin-left: 8px;">
+              <select id="paymentModeSelect" class="form-input" style="width:170px;margin-left:8px;">
                 <option value="Cash">Cash</option>
                 <option value="Credit Card">Credit Card</option>
                 <option value="Bank Transfer">Bank Transfer</option>
@@ -361,7 +466,9 @@
             <div class="summary-row">
               <label>Amount Paid <input type="number" id="amountPaidInput" min="0" step="0.01" value="0" style="width:180px;margin-left:8px" /></label>
             </div>
-            <div class="summary-row"><span>Remaining Amount:</span><span id="remainingAmount">₹0</span></div>
+            <div class="summary-row">
+              <span>Remaining Amount:</span><span id="remainingAmount">₹0</span>
+            </div>
           </div>
         </form>
       </div>
@@ -397,5 +504,21 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <script src="script.js"></script>
+  <script>
+    // Welcome toast with correct version/build
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(function(){
+        const v = '1.0.959X-Pro';
+        const b = 'September, 2025';
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = 'toast success';
+        t.innerHTML = '<i class="fas fa-info-circle toast-icon"></i><span class="toast-message">Welcome to UniBills — Version ' + v + ' (Build ' + b + ')</span><button class="toast-close">&times;</button>';
+        c.appendChild(t);
+        t.querySelector('.toast-close').addEventListener('click', ()=> t.remove());
+        setTimeout(()=> t.remove(), 5000);
+      }, 600);
+    });
+  </script>
 </body>
 </html>
