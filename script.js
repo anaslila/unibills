@@ -1,13 +1,46 @@
-/* Bills v1.0.9265C — script.js */
+/* UniBills v1.0.959X-Pro — script.js */
 
-/* -------------------- Seed Data -------------------- */
-let invoices = [];
+/* ---------- In-memory Data ---------- */
+let invoices = [
+  {
+    id: 'INV-001',
+    client: 'Acme Corp', clientId: 'client-001', clientPhone: '+91 9876543210',
+    date: '2025-09-01',
+    items: [{ description: 'Web Development', quantity: 1, rate: 25000, unit: 'service' }],
+    discountMode: 'PERCENT', discountPercent: 0, discountAmount: 0,
+    taxPct: 18, taxIncluded: false,
+    paymentMode: 'UPI', amountPaid: 29500,
+    amount: 29500, status: 'paid'
+  },
+  {
+    id: 'INV-002',
+    client: 'Tech Solutions', clientId: 'client-002', clientPhone: '+91 9876543211',
+    date: '2025-08-28',
+    items: [{ description: 'UI/UX Design', quantity: 1, rate: 18500, unit: 'service' }],
+    discountMode: 'PERCENT', discountPercent: 0, discountAmount: 0,
+    taxPct: 18, taxIncluded: false,
+    paymentMode: 'Bank Transfer', amountPaid: 0,
+    amount: 21830, status: 'pending'
+  },
+  {
+    id: 'INV-003',
+    client: 'Digital Agency', clientId: 'client-003', clientPhone: '+91 9876543212',
+    date: '2025-08-25',
+    items: [{ description: 'Mobile App Development', quantity: 1, rate: 32000, unit: 'service' }],
+    discountMode: 'PERCENT', discountPercent: 0, discountAmount: 0,
+    taxPct: 18, taxIncluded: false,
+    paymentMode: 'Cash', amountPaid: 0,
+    amount: 37760, status: 'overdue'
+  }
+];
+
 let products = [
   { id: 'PRD-001', name: 'Website Development Package', price: 25000, stock: 10, unit: 'service', category: 'Services' },
   { id: 'PRD-002', name: 'Mobile App Development', price: 45000, stock: 5, unit: 'service', category: 'Services' },
   { id: 'PRD-003', name: 'Logo Design', price: 5000, stock: 0, unit: 'pcs', category: 'Design' },
   { id: 'PRD-004', name: 'SEO Optimization', price: 12000, stock: 3, unit: 'service', category: 'Marketing' }
 ];
+
 let clients = [
   { id: 'client-001', name: 'Acme Corp', email: 'contact@acme.com', phone: '+91 9876543210', address: '123 Business Street, Mumbai' },
   { id: 'client-002', name: 'Tech Solutions', email: 'info@techsolutions.com', phone: '+91 9876543211', address: '456 Tech Park, Bangalore' },
@@ -15,25 +48,26 @@ let clients = [
 ];
 
 let businessSettings = {
+  developer: 'UniBills Team',
+  version: '1.0.959X-Pro',
+  build: 'September, 2025',
   name: 'Your Business Name',
   email: 'business@example.com',
   phone: '+91 9876543210',
   gst: '29ABCDE1234F1Z5',
   website: 'www.yourbusiness.com',
   address: '123 Business Street, City, State 12345',
-  logo: null,
-  version: '1.0.9265C',
-  build: 'August, 2025',
-  defaultTaxPct: 18,
-  defaultTaxIncluded: false
+  logo: null
 };
 
 let currentInvoiceId = null;
+let editingClientId = null;
+let editingProductId = null;
 
-/* -------------------- Utilities -------------------- */
+/* ---------- Utils ---------- */
 function formatCurrency(n){
-  const val = isFinite(n) ? n : 0;
-  return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0}).format(Math.round(val));
+  const v = isFinite(n)? n : 0;
+  return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0}).format(Math.round(v));
 }
 function formatDate(s){
   return new Date(s).toLocaleDateString('en-IN',{year:'numeric',month:'short',day:'numeric'});
@@ -47,10 +81,10 @@ function showToast(msg, type='success'){
   const c = document.getElementById('toastContainer');
   const t = document.createElement('div');
   t.className = `toast ${type}`;
-  const icon = type==='success'?'fa-check-circle':type==='error'?'fa-exclamation-circle':'fa-info-circle';
+  const icon = type==='success'?'fa-check-circle': type==='error'?'fa-exclamation-circle':'fa-info-circle';
   t.innerHTML = `<i class="fas ${icon} toast-icon"></i><span class="toast-message">${msg}</span><button class="toast-close">&times;</button>`;
   c.appendChild(t);
-  const close = ()=> t.remove();
+  const close=()=> t.remove();
   t.querySelector('.toast-close').addEventListener('click', close);
   setTimeout(close, 5000);
 }
@@ -58,49 +92,60 @@ function showLoading(){ document.getElementById('loadingSpinner').classList.add(
 function hideLoading(){ document.getElementById('loadingSpinner').classList.remove('active'); }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
-/* -------------------- Navigation -------------------- */
+/* ---------- Navigation + Routing between sections ---------- */
 function initNavigation(){
   const links = document.querySelectorAll('.nav-link');
   const sections = document.querySelectorAll('.content-section');
   links.forEach(link=>{
     link.addEventListener('click', e=>{
       e.preventDefault();
+      const section = link.dataset.section;
       links.forEach(l=>l.classList.remove('active'));
-      sections.forEach(s=>s.classList.remove('active'));
       link.classList.add('active');
-      const id = link.dataset.section + '-section';
-      document.getElementById(id)?.classList.add('active');
-      loadSection(link.dataset.section);
+      sections.forEach(s=>s.classList.remove('active'));
+      document.getElementById(`${section}-section`)?.classList.add('active');
+      loadSection(section);
     });
   });
+  // back buttons from details
+  document.getElementById('backToClients')?.addEventListener('click', ()=> goToSection('clients'));
+  document.getElementById('backToInventory')?.addEventListener('click', ()=> goToSection('inventory'));
+}
+function goToSection(section){
+  document.querySelectorAll('.nav-link').forEach(n=>{
+    if (n.dataset.section===section) n.classList.add('active'); else n.classList.remove('active');
+  });
+  document.querySelectorAll('.content-section').forEach(s=> s.classList.remove('active'));
+  document.getElementById(`${section}-section`)?.classList.add('active');
+  loadSection(section);
 }
 function loadSection(section){
-  switch(section){
-    case 'dashboard': updateDashboardStats(); renderRecentInvoices(); break;
-    case 'invoices': renderInvoicesTable(); break;
-    case 'inventory': renderProductGrid(); break;
-    case 'clients': renderClientGrid(); break;
-    case 'settings': loadBusinessSettings(); break;
-  }
+  if (section==='dashboard'){ updateDashboardStats(); renderRecentInvoices(); }
+  if (section==='invoices'){ renderInvoicesTable(); }
+  if (section==='inventory'){ renderProductGrid(); updateInventoryStats(); }
+  if (section==='clients'){ renderClientGrid(); }
+  if (section==='reports'){ renderReports(); }
+  if (section==='settings'){ loadBusinessSettings(); }
 }
 
-/* -------------------- Dashboard -------------------- */
+/* ---------- Dashboard ---------- */
 function updateDashboardStats(){
-  const totalRevenue = invoices.reduce((s,i)=> i.status==='paid'? s+i.amount : s, 0);
-  const pending = invoices.reduce((s,i)=> i.status!=='paid'? s+i.amount : s, 0);
+  const totalRevenue = invoices.reduce((s,i)=> i.status==='paid'? s + (i.amount||0) : s, 0);
+  const pendingAmt = invoices.reduce((s,i)=> i.status!=='paid'? s + (i.amount||0) - (i.amountPaid||0) : s, 0);
   const invCount = invoices.length;
-  const totalUnits = products.reduce((s,p)=> s + (Number(p.stock)||0), 0);
-  const stats = document.querySelectorAll('.stat-number');
-  if (stats) stats.textContent = formatCurrency(totalRevenue);
-  if (stats[11]) stats[11].textContent = invCount;
-  if (stats[12]) stats[12].textContent = formatCurrency(pending);
-  if (stats[13]) stats[13].textContent = totalUnits;
+  const units = products.reduce((s,p)=> s + (Number(p.stock)||0), 0);
+
+  setText('#statRevenue', formatCurrency(totalRevenue));
+  setText('#statPending', formatCurrency(Math.max(0,pendingAmt)));
+  setText('#statInvoices', invCount);
+  setText('#statStock', units);
 }
+function setText(sel, val){ const el = document.querySelector(sel); if (el) el.textContent = val; }
 function renderRecentInvoices(){
   const wrap = document.querySelector('.invoice-list');
   if (!wrap) return;
   const recent = [...invoices].slice(-3).reverse();
-  wrap.innerHTML = recent.length ? recent.map(inv=>`
+  wrap.innerHTML = recent.length? recent.map(inv=>`
     <div class="invoice-item">
       <div class="invoice-info">
         <h4 class="invoice-number">${inv.id}</h4>
@@ -116,12 +161,16 @@ function renderRecentInvoices(){
   `).join('') : `<div style="padding:20px;color:var(--muted)">No invoices yet</div>`;
 }
 
-/* -------------------- Invoices List -------------------- */
+/* ---------- Invoices list ---------- */
 function renderInvoicesTable(){
   const tbody = document.getElementById('invoiceTableBody');
   if (!tbody) return;
-  tbody.innerHTML = invoices.length ? invoices.map(inv=>{
-    const remaining = Math.max(0, (Number(inv.amount)||0) - (Number(inv.amountPaid)||0));
+  if (!invoices.length){
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">No invoices</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = invoices.map(inv=>{
+    const remaining = Math.max(0,(inv.amount||0)-(inv.amountPaid||0));
     return `
       <tr>
         <td><strong>${inv.id}</strong></td>
@@ -129,8 +178,8 @@ function renderInvoicesTable(){
         <td>${formatDate(inv.date)}</td>
         <td><strong>${formatCurrency(inv.amount)}</strong></td>
         <td><span class="invoice-status status-${inv.status}">${inv.status.toUpperCase()}</span></td>
-        <td>${inv.paymentMode || '-'}</td>
-        <td>${formatCurrency(inv.amountPaid || 0)}</td>
+        <td>${inv.paymentMode||'-'}</td>
+        <td>${formatCurrency(inv.amountPaid||0)}</td>
         <td>${formatCurrency(remaining)}</td>
         <td>
           <div class="invoice-actions">
@@ -142,7 +191,7 @@ function renderInvoicesTable(){
         </td>
       </tr>
     `;
-  }).join('') : `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">No invoices</td></tr>`;
+  }).join('');
 }
 
 /* Search/Filter in Invoices */
@@ -151,15 +200,15 @@ function initInvoiceSearch(){
   document.getElementById('invoiceFilter')?.addEventListener('change', filterInvoices);
 }
 function filterInvoices(){
-  const term = (document.getElementById('invoiceSearch')?.value || '').toLowerCase();
+  const term = (document.getElementById('invoiceSearch')?.value||'').toLowerCase();
   const status = document.getElementById('invoiceFilter')?.value || 'all';
   const tbody = document.getElementById('invoiceTableBody');
   const filtered = invoices.filter(inv=>{
-    const textMatch = inv.id.toLowerCase().includes(term) || inv.client.toLowerCase().includes(term) || String(inv.amount).includes(term);
-    const statusMatch = status==='all' || inv.status===status;
-    return textMatch && statusMatch;
+    const text = inv.id.toLowerCase().includes(term) || inv.client.toLowerCase().includes(term) || String(inv.amount).includes(term);
+    const st = status==='all' || inv.status===status;
+    return text && st;
   });
-  tbody.innerHTML = filtered.length ? filtered.map(inv=>{
+  tbody.innerHTML = filtered.length? filtered.map(inv=>{
     const remaining = Math.max(0,(inv.amount||0)-(inv.amountPaid||0));
     return `
       <tr>
@@ -168,8 +217,8 @@ function filterInvoices(){
         <td>${formatDate(inv.date)}</td>
         <td><strong>${formatCurrency(inv.amount)}</strong></td>
         <td><span class="invoice-status status-${inv.status}">${inv.status.toUpperCase()}</span></td>
-        <td>${inv.paymentMode || '-'}</td>
-        <td>${formatCurrency(inv.amountPaid || 0)}</td>
+        <td>${inv.paymentMode||'-'}</td>
+        <td>${formatCurrency(inv.amountPaid||0)}</td>
         <td>${formatCurrency(remaining)}</td>
         <td>
           <div class="invoice-actions">
@@ -184,7 +233,7 @@ function filterInvoices(){
   }).join('') : `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">No invoices found</td></tr>`;
 }
 
-/* -------------------- Invoice Modal -------------------- */
+/* ---------- Invoice Modal (Per-invoice Tax + Discount dual mode) ---------- */
 function initInvoiceModal(){
   const modal = document.getElementById('invoiceModal');
   document.getElementById('createInvoiceBtn')?.addEventListener('click', ()=>openInvoiceModal());
@@ -196,89 +245,92 @@ function initInvoiceModal(){
   initInvoiceForm();
 }
 function openInvoiceModal(editId=null){
-  const d = new Date(); document.getElementById('invoiceDate').value = d.toISOString().split('T');
-  // apply global default tax controls to header inputs if empty
-  const taxInput = document.getElementById('taxRateInput');
-  const taxIncluded = document.getElementById('taxIncludedCheckbox');
-  if (taxInput && !taxInput.value) taxInput.value = businessSettings.defaultTaxPct ?? 18;
-  if (taxIncluded) taxIncluded.checked = !!businessSettings.defaultTaxIncluded;
   resetInvoiceForm();
-  if (editId) preloadInvoiceToForm(editId);
+  if (editId) preloadInvoice(editId);
   document.getElementById('invoiceModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 }
 function closeInvoiceModal(){
   document.getElementById('invoiceModal').classList.remove('active');
-  document.body.style.overflow = 'auto';
+  document.body.style.overflow='auto';
 }
 function resetInvoiceForm(){
   const form = document.getElementById('invoiceForm');
   form.reset();
-  const items = document.querySelector('.invoice-items');
-  // keep one row
-  items.querySelectorAll('.item-row').forEach((r,i)=>{ if (i>0) r.remove(); });
-  const row = items.querySelector('.item-row');
+  document.getElementById('invoiceDate').value = new Date().toISOString().split('T');
+
+  // keep one line
+  const wrap = document.querySelector('.invoice-items');
+  wrap.querySelectorAll('.item-row').forEach((r,i)=>{ if (i>0) r.remove(); });
+  const row = wrap.querySelector('.item-row');
   row.querySelector('.item-search').value = '';
   row.querySelector('.quantity-input').value = '';
   row.querySelector('.unit-input').value = '';
   row.querySelector('.rate-input').value = '';
   row.querySelector('.item-total').textContent = formatCurrency(0);
-  const clientName = document.getElementById('invoiceClient');
-  const clientPhone = document.getElementById('clientPhoneInput');
-  clientName.value=''; clientPhone.value='';
-  delete clientName.dataset.clientId;
-  document.getElementById('discountInput').value=0;
-  document.getElementById('otherTaxInput').value=0;
-  document.getElementById('paymentModeSelect').value='Cash';
-  document.getElementById('amountPaidInput').value=0;
-  document.getElementById('subtotal').textContent=formatCurrency(0);
-  document.getElementById('tax').textContent=formatCurrency(0);
-  document.getElementById('total').textContent=formatCurrency(0);
+
+  // client
+  const cn = document.getElementById('invoiceClient'); const cp = document.getElementById('clientPhoneInput');
+  cn.value=''; cp.value=''; delete cn.dataset.clientId;
+
+  // invoice-specific tax + discount
+  document.getElementById('discountMode').value='PERCENT';
+  document.getElementById('discountInputPercent').value = 0;
+  document.getElementById('discountInputAmount').value = 0;
+  document.getElementById('invoiceTaxPct').value = 18;
+  document.getElementById('invoiceTaxIncluded').checked = false;
+
+  // totals
+  setText('#subtotal', formatCurrency(0));
+  setText('#tax', formatCurrency(0));
+  setText('#total', formatCurrency(0));
+  setText('#remainingAmount', formatCurrency(0));
+  document.getElementById('amountPaidInput').value = 0;
+
+  initClientDropdown();
+  initItemDropdowns();
+  wireSummaryInputs();
 }
-function preloadInvoiceToForm(id){
+function preloadInvoice(id){
   const inv = invoices.find(i=>i.id===id); if (!inv) return;
   const name = document.getElementById('invoiceClient');
   const phone = document.getElementById('clientPhoneInput');
-  name.value = inv.client; name.dataset.clientId = inv.clientId||'';
+  name.value = inv.client; name.dataset.clientId = inv.clientId || '';
   phone.value = inv.clientPhone || '';
   document.getElementById('invoiceDate').value = inv.date;
-  const items = document.querySelector('.invoice-items');
-  items.querySelectorAll('.item-row').forEach((r,i)=>{ if (i>0) r.remove(); });
-  const baseRow = items.querySelector('.item-row');
+
+  // items
+  const wrap = document.querySelector('.invoice-items');
+  wrap.querySelectorAll('.item-row').forEach((r,i)=>{ if (i>0) r.remove(); });
+  const first = wrap.querySelector('.item-row');
   inv.items.forEach((it, idx)=>{
-    let row = baseRow;
-    if (idx>0){
-      row = addInvoiceItem(true);
-    }
+    let row = first;
+    if (idx>0) row = addInvoiceItem(true);
     row.querySelector('.item-search').value = it.description;
     row.querySelector('.quantity-input').value = it.quantity;
     row.querySelector('.unit-input').value = it.unit || '';
     row.querySelector('.rate-input').value = it.rate;
-    row.querySelector('.item-total').textContent = formatCurrency(it.quantity*it.rate);
   });
-  document.getElementById('discountInput').value = inv.discountPct || 0;
-  document.getElementById('otherTaxInput').value = inv.otherTaxPct || 0;
+
+  // discount & tax
+  document.getElementById('discountMode').value = inv.discountMode || 'PERCENT';
+  document.getElementById('discountInputPercent').value = inv.discountPercent || 0;
+  document.getElementById('discountInputAmount').value = inv.discountAmount || 0;
+  document.getElementById('invoiceTaxPct').value = typeof inv.taxPct==='number'? inv.taxPct : 18;
+  document.getElementById('invoiceTaxIncluded').checked = !!inv.taxIncluded;
+
   document.getElementById('paymentModeSelect').value = inv.paymentMode || 'Cash';
   document.getElementById('amountPaidInput').value = inv.amountPaid || 0;
-  document.getElementById('taxRateInput').value = typeof inv.taxPct==='number' ? inv.taxPct : (businessSettings.defaultTaxPct ?? 18);
-  document.getElementById('taxIncludedCheckbox').checked = !!inv.taxIncluded;
+
+  wireSummaryInputs();
   updateInvoiceTotal();
 }
 function initInvoiceForm(){
-  const form = document.getElementById('invoiceForm');
   document.getElementById('addItemBtn')?.addEventListener('click', ()=>addInvoiceItem());
-  // live totals updates
-  ['discountInput','otherTaxInput','amountPaidInput','taxRateInput'].forEach(id=>{
-    document.getElementById(id)?.addEventListener('input', updateInvoiceTotal);
-  });
-  document.getElementById('taxIncludedCheckbox')?.addEventListener('change', updateInvoiceTotal);
-  // Searchable dropdowns
-  initClientDropdown();
-  initItemDropdowns();
-  form.addEventListener('submit', handleInvoiceSubmit);
+  document.getElementById('invoiceForm')?.addEventListener('submit', handleInvoiceSubmit);
 }
 function addInvoiceItem(returnRow=false){
-  const wrap = document.querySelector('.invoice-items');
+  const container = document.querySelector('.invoice-items');
   const shell = document.createElement('div');
   shell.className='item-row';
   shell.innerHTML = `
@@ -294,7 +346,7 @@ function addInvoiceItem(returnRow=false){
       <div class="dropdown-list item-dropdown-list"></div>
     </div>
   `;
-  wrap.appendChild(shell);
+  container.appendChild(shell);
   const qty = shell.querySelector('.quantity-input');
   const rate = shell.querySelector('.rate-input');
   qty.addEventListener('input', updateInvoiceTotal);
@@ -303,119 +355,181 @@ function addInvoiceItem(returnRow=false){
   initSingleItemDropdown(shell.querySelector('.item-search'));
   if (returnRow) return shell;
 }
-function updateInvoiceTotal(){
-  const rows = document.querySelectorAll('.item-row');
+function wireSummaryInputs(){
+  const ids = ['discountMode','discountInputPercent','discountInputAmount','invoiceTaxPct','invoiceTaxIncluded','amountPaidInput'];
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if (!el) return;
+    const evt = id==='invoiceTaxIncluded'? 'change' : 'input';
+    el.addEventListener(evt, ()=>{
+      if (id==='discountInputPercent') syncDiscountFromPercent();
+      if (id==='discountInputAmount') syncDiscountFromAmount();
+      if (id==='discountMode') enforceDiscountMode();
+      updateInvoiceTotal();
+    }, { passive:true });
+  });
+}
+function syncDiscountFromPercent(){
+  const percent = parseFloat(document.getElementById('discountInputPercent').value)||0;
+  const { base } = computeBaseAndTaxPreview(); // base before tax
+  const amt = Math.max(0, base * (percent/100));
+  document.getElementById('discountInputAmount').value = round2(amt);
+}
+function syncDiscountFromAmount(){
+  const amount = parseFloat(document.getElementById('discountInputAmount').value)||0;
+  const { base } = computeBaseAndTaxPreview();
+  const pct = base>0 ? (amount/base)*100 : 0;
+  document.getElementById('discountInputPercent').value = round2(pct);
+}
+function enforceDiscountMode(){
+  const mode = document.getElementById('discountMode').value;
+  const p = document.getElementById('discountInputPercent');
+  const a = document.getElementById('discountInputAmount');
+  if (mode==='PERCENT'){ p.removeAttribute('disabled'); a.setAttribute('disabled','disabled'); }
+  else { a.removeAttribute('disabled'); p.setAttribute('disabled','disabled'); }
+}
+function round2(n){ return Math.round((n + Number.EPSILON)*100)/100; }
+
+function computeBaseAndTaxPreview(){
+  // subtotal from lines
   let subtotal = 0;
-  rows.forEach(r=>{
+  document.querySelectorAll('.item-row').forEach(r=>{
+    const q = parseFloat(r.querySelector('.quantity-input').value)||0;
+    const rate = parseFloat(r.querySelector('.rate-input').value)||0;
+    subtotal += q*rate;
+  });
+  const taxPct = parseFloat(document.getElementById('invoiceTaxPct').value)||0;
+  const included = document.getElementById('invoiceTaxIncluded').checked;
+  let base = subtotal, tax = 0;
+  if (included){
+    const f = 1 + (taxPct/100);
+    const net = f? (subtotal / f) : subtotal; // extract base from inclusive [9]
+    tax = subtotal - net; base = net;
+  } else {
+    tax = base * (taxPct/100);
+  }
+  return { subtotal, base, tax, taxPct, included };
+}
+function updateInvoiceTotal(){
+  // update per-line totals
+  let subtotal = 0;
+  document.querySelectorAll('.item-row').forEach(r=>{
     const q = parseFloat(r.querySelector('.quantity-input').value)||0;
     const rate = parseFloat(r.querySelector('.rate-input').value)||0;
     const t = q*rate;
     r.querySelector('.item-total').textContent = formatCurrency(t);
     subtotal += t;
   });
-  // global defaults (in Invoices header)
-  const taxPct = parseFloat(document.getElementById('taxRateInput')?.value)||0;
-  const taxIncluded = document.getElementById('taxIncludedCheckbox')?.checked || false;
-  const discountPct = parseFloat(document.getElementById('discountInput').value)||0;
-  const otherTaxPct = parseFloat(document.getElementById('otherTaxInput').value)||0;
 
-  let base = subtotal, tax = 0;
-  if (taxIncluded){
-    const f = 1 + (taxPct/100);
-    const net = f ? subtotal / f : subtotal;
-    tax = subtotal - net;
-    base = net;
+  const { base, tax, taxPct, included } = computeBaseAndTaxPreview();
+
+  // discount
+  const mode = document.getElementById('discountMode').value;
+  const discPct = parseFloat(document.getElementById('discountInputPercent').value)||0;
+  const discAmt = parseFloat(document.getElementById('discountInputAmount').value)||0;
+
+  const discountAmount = mode==='PERCENT' ? (base * (discPct/100)) : discAmt;
+  const baseAfterDiscount = Math.max(0, base - discountAmount);
+
+  // recompute tax only on base (if excluded), if included we keep extracted tax model simple
+  let total = 0, taxDisplay = 0;
+  if (included){
+    // Inclusive price: total = (baseAfterDiscount + tax proportionally kept). For simplicity, reduce base only; tax will be displayed as extracted from original subtotal.
+    const proportion = base>0 ? (baseAfterDiscount/base) : 0;
+    const adjustedTax = tax * proportion;
+    total = baseAfterDiscount + adjustedTax;
+    taxDisplay = adjustedTax;
   } else {
-    tax = base * (taxPct/100);
+    const taxRecalc = baseAfterDiscount * (taxPct/100);
+    total = baseAfterDiscount + taxRecalc;
+    taxDisplay = taxRecalc;
   }
 
-  const discountAmt = base * (discountPct/100);
-  const afterDiscount = Math.max(0, base - discountAmt);
-  const beforeOther = afterDiscount + tax;
-  const otherTaxAmt = beforeOther * (otherTaxPct/100);
-  const grand = beforeOther + otherTaxAmt;
-
-  document.getElementById('subtotal').textContent = formatCurrency(base);
-  document.getElementById('tax').textContent = formatCurrency(tax + otherTaxAmt);
-  document.getElementById('total').textContent = formatCurrency(grand);
+  setText('#subtotal', formatCurrency(baseAfterDiscount));
+  setText('#tax', formatCurrency(taxDisplay));
+  setText('#total', formatCurrency(total));
 
   const paid = parseFloat(document.getElementById('amountPaidInput').value)||0;
-  const remaining = Math.max(0, grand - paid);
-  document.getElementById('remainingAmount').textContent = formatCurrency(remaining);
+  setText('#remainingAmount', formatCurrency(Math.max(0,total - paid)));
 }
 function handleInvoiceSubmit(e){
   e.preventDefault();
   showLoading();
   setTimeout(()=>{
-    const name = document.getElementById('invoiceClient');
-    const phone = document.getElementById('clientPhoneInput');
-    const date = document.getElementById('invoiceDate').value;
-    let client = null;
-    if (name.dataset.clientId){
-      client = clients.find(c=>c.id===name.dataset.clientId);
-      if (client && phone.value) client.phone = phone.value.trim();
+    // client
+    const nameEl = document.getElementById('invoiceClient');
+    const phoneEl = document.getElementById('clientPhoneInput');
+    let clientObj = null;
+    if (nameEl.dataset.clientId){
+      clientObj = clients.find(c=>c.id===nameEl.dataset.clientId);
+      if (clientObj && phoneEl.value) clientObj.phone = phoneEl.value.trim();
     } else {
-      const id = genId('client', clients);
-      client = { id, name: name.value.trim(), phone: phone.value.trim(), email:'', address:'' };
-      clients.push(client);
+      const newId = genId('client', clients);
+      clientObj = { id:newId, name: nameEl.value.trim(), phone: phoneEl.value.trim(), email:'', address:'' };
+      clients.push(clientObj);
     }
+    // items
     const items = [];
     document.querySelectorAll('.item-row').forEach(r=>{
-      const title = r.querySelector('.item-search').value.trim();
+      const desc = r.querySelector('.item-search').value.trim();
       const q = parseFloat(r.querySelector('.quantity-input').value)||0;
       const unit = (r.querySelector('.unit-input').value||'pcs').trim();
       const rate = parseFloat(r.querySelector('.rate-input').value)||0;
-      if (!title) return;
-      const prod = products.find(p=>p.name.toLowerCase()===title.toLowerCase());
-      if (!prod){
-        products.push({ id: genId('PRD', products), name: title, price: rate, stock: 0, unit, category: 'General' });
+      if (!desc) return;
+      // add product if new
+      if (!products.find(p=>p.name.toLowerCase()===desc.toLowerCase())){
+        products.push({ id: genId('PRD', products), name: desc, price: rate, stock: 0, unit, category: 'General' });
       }
-      items.push({ description:title, quantity:q, rate, unit });
+      items.push({ description: desc, quantity: q, rate, unit });
     });
-    // totals same as UI
-    const subtotal = items.reduce((s,it)=> s + (it.quantity*it.rate), 0);
-    const taxPct = parseFloat(document.getElementById('taxRateInput')?.value)||0;
-    const taxIncluded = document.getElementById('taxIncludedCheckbox')?.checked || false;
-    let base = subtotal, tax=0;
-    if (taxIncluded){ const f=1+(taxPct/100); const net = f? subtotal/f : subtotal; tax = subtotal-net; base=net; }
-    else tax = base*(taxPct/100);
-    const discountPct = parseFloat(document.getElementById('discountInput').value)||0;
-    const otherTaxPct = parseFloat(document.getElementById('otherTaxInput').value)||0;
-    const discountAmt = base*(discountPct/100);
-    const afterDiscount = Math.max(0, base - discountAmt);
-    const beforeOther = afterDiscount + tax;
-    const otherTaxAmt = beforeOther*(otherTaxPct/100);
-    const total = beforeOther + otherTaxAmt;
+
+    // totals
+    const { base } = computeBaseAndTaxPreview(); // from current inputs
+    const mode = document.getElementById('discountMode').value;
+    const discPct = parseFloat(document.getElementById('discountInputPercent').value)||0;
+    const discAmt = parseFloat(document.getElementById('discountInputAmount').value)||0;
+    const taxPct = parseFloat(document.getElementById('invoiceTaxPct').value)||0;
+    const included = document.getElementById('invoiceTaxIncluded').checked;
+    let discountAmount = mode==='PERCENT' ? (base*(discPct/100)) : discAmt;
+    const baseAfterDiscount = Math.max(0, base - discountAmount);
+
+    let total = 0;
+    if (included){
+      // total is discounted base + proportional tax (same approach as preview)
+      const { tax } = computeBaseAndTaxPreview();
+      const proportion = base>0 ? (baseAfterDiscount/base) : 0;
+      total = baseAfterDiscount + (tax*proportion);
+    } else {
+      total = baseAfterDiscount + (baseAfterDiscount*(taxPct/100));
+    }
 
     const paymentMode = document.getElementById('paymentModeSelect').value;
-    const amountPaid = parseFloat(document.getElementById('amountPaidInput').value)||0;
+    const paid = parseFloat(document.getElementById('amountPaidInput').value)||0;
 
-    const inv = {
+    const newInv = {
       id: genId('INV', invoices),
-      client: client.name,
-      clientId: client.id,
-      clientPhone: client.phone || '',
-      date,
+      client: clientObj.name, clientId: clientObj.id, clientPhone: clientObj.phone||'',
+      date: document.getElementById('invoiceDate').value,
       items,
+      discountMode: mode,
+      discountPercent: mode==='PERCENT'? discPct : (base>0 ? (discountAmount/base)*100 : 0),
+      discountAmount: mode==='AMOUNT'? discAmt : (base*(discPct/100)),
+      taxPct, taxIncluded: included,
+      paymentMode, amountPaid: paid,
       amount: total,
-      discountPct, otherTaxPct, taxPct, taxIncluded,
-      paymentMode, amountPaid,
-      status: amountPaid >= total ? 'paid' : 'pending'
+      status: paid >= total ? 'paid' : 'pending'
     };
-    invoices.unshift(inv);
-
-    // Persist header defaults for next time
-    businessSettings.defaultTaxPct = taxPct;
-    businessSettings.defaultTaxIncluded = taxIncluded;
+    invoices.unshift(newInv);
 
     hideLoading(); closeInvoiceModal();
-    showToast(`Invoice ${inv.id} created successfully!`);
+    showToast(`Invoice ${newInv.id} created successfully!`);
     updateDashboardStats(); renderRecentInvoices(); renderInvoicesTable();
+    renderProductGrid(); renderClientGrid();
     saveAll();
-  }, 400);
+  }, 300);
 }
 
-/* -------------------- Searchable Dropdowns -------------------- */
+/* ---------- Searchable Dropdowns ---------- */
 function initClientDropdown(){
   const input = document.getElementById('invoiceClient');
   const phone = document.getElementById('clientPhoneInput');
@@ -440,7 +554,7 @@ function initClientDropdown(){
         <div class="dropdown-item-sub">${escapeHtml(c.phone||'No phone')}</div>
       </div>
     `).join('');
-    const addRow = exact ? '' : `
+    const addRow = exact? '' : `
       <div class="dropdown-item add-new" tabindex="0" onclick="addNewClientFromTerm('${encodeURIComponent(term)}')">
         <div class="dropdown-item-main"><i class="fas fa-plus-circle"></i> Add "${escapeHtml(term)}" as new client</div>
       </div>`;
@@ -449,16 +563,13 @@ function initClientDropdown(){
 
   window.selectClient = (id)=>{
     const c = clients.find(x=>x.id===id); if (!c) return;
-    input.dataset.clientId = c.id;
-    input.value = c.name;
-    phone.value = c.phone || '';
+    input.dataset.clientId = c.id; input.value = c.name; phone.value = c.phone || '';
   };
   window.addNewClientFromTerm = (enc)=>{
     const name = decodeURIComponent(enc);
     delete input.dataset.clientId;
-    input.value = name;
+    input.value = name; phone.focus();
     showToast(`Enter a contact number for "${name}"`, 'info');
-    phone.focus();
   };
 }
 function initItemDropdowns(){
@@ -502,31 +613,27 @@ function initSingleItemDropdown(input){
 
   window.selectProductLine = (id, el)=>{
     const p = products.find(x=>x.id===id); if (!p) return;
-    input.value = p.name;
-    if (!qty.value) qty.value = 1;
-    rate.value = p.price;
-    unit.value = p.unit || 'pcs';
+    input.value = p.name; if (!qty.value) qty.value = 1;
+    rate.value = p.price; unit.value = p.unit || 'pcs';
     updateInvoiceTotal();
   };
   window.addNewProductLine = (enc, el)=>{
     const name = decodeURIComponent(enc);
-    input.value = name;
-    if (!qty.value) qty.value = 1;
+    input.value = name; if (!qty.value) qty.value = 1;
     if (!unit.value) unit.value = 'pcs';
     showToast(`Enter unit and rate for "${name}"`, 'info');
     updateInvoiceTotal();
   };
 }
 
-/* -------------------- WhatsApp Share -------------------- */
+/* ---------- WhatsApp Share ---------- */
 let sharingInvoiceId = null;
-function openWhatsappModal(id){ sharingInvoiceId = id; document.getElementById('whatsappModal').classList.add('active'); document.body.style.overflow='hidden'; }
-function closeWhatsappModal(){ document.getElementById('whatsappModal').classList.remove('active'); document.body.style.overflow='auto'; sharingInvoiceId=null; }
+function openWhatsappModal(id){ sharingInvoiceId=id; document.getElementById('whatsappModal').classList.add('active'); document.body.style.overflow='hidden'; }
+function closeWhatsappModal(){ sharingInvoiceId=null; document.getElementById('whatsappModal').classList.remove('active'); document.body.style.overflow='auto'; }
 function shareInvoiceFormat(fmt){
   if (!sharingInvoiceId) return;
-  const inv = invoices.find(i=>i.id===sharingInvoiceId);
+  const inv = invoices.find(i=>i.id===sharingInvoiceId); if (!inv) return showToast('Invoice not found','error');
   closeWhatsappModal();
-  if (!inv) return showToast('Invoice not found','error');
   showLoading();
   if (fmt==='text'){ setTimeout(()=>{ shareText(inv); hideLoading(); }, 300); }
   else { setTimeout(()=>{ shareImage(inv); hideLoading(); }, 700); }
@@ -535,31 +642,10 @@ function shareText(inv){
   const client = clients.find(c=>c.id===inv.clientId);
   const phone = (inv.clientPhone || client?.phone || '').replace(/\D/g,'');
   const items = inv.items.map(it=>`• ${it.description} — ${it.quantity} ${it.unit} × ${formatCurrency(it.rate)} = ${formatCurrency(it.quantity*it.rate)}`).join('\n');
-  const subtotal = inv.items.reduce((s,it)=>s+it.quantity*it.rate,0);
-  const remaining = Math.max(0,(inv.amount||0) - (inv.amountPaid||0));
-  const message =
-`*${businessSettings.name}*
-📧 ${businessSettings.email}
-📞 ${businessSettings.phone}
-🏢 ${businessSettings.address}
-GST: ${businessSettings.gst}
-
-*INVOICE ${inv.id}*
-Date: ${formatDate(inv.date)}
-Client: ${inv.client}
-
-*ITEMS:*
-${items}
-
-Subtotal: ${formatCurrency(subtotal)}
-Total: ${formatCurrency(inv.amount)}
-Paid: ${formatCurrency(inv.amountPaid||0)}
-Remaining: ${formatCurrency(remaining)}
-Status: ${inv.status.toUpperCase()}
-
-Thank you for your business!`;
-  const encoded = encodeURIComponent(message); // URL-encode per WhatsApp share link practice [7][10]
-  const url = `https://wa.me/${phone}?text=${encoded}`;
+  const subtotal = inv.items.reduce((s,it)=> s + (it.quantity*it.rate), 0);
+  const remaining = Math.max(0,(inv.amount||0)-(inv.amountPaid||0));
+  const msg = `*${businessSettings.name}*\n📧 ${businessSettings.email}\n📞 ${businessSettings.phone}\n🏢 ${businessSettings.address}\nGST: ${businessSettings.gst}\n\n*INVOICE ${inv.id}*\nDate: ${formatDate(inv.date)}\nClient: ${inv.client}\n\n*ITEMS:*\n${items}\n\nSubtotal: ${formatCurrency(subtotal)}\nTotal: ${formatCurrency(inv.amount)}\nPaid: ${formatCurrency(inv.amountPaid||0)}\nRemaining: ${formatCurrency(remaining)}\nStatus: ${inv.status.toUpperCase()}\n\nThank you for your business!`;
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`; // URL encode WhatsApp text [9]
   window.open(url,'_blank');
   showToast('Opening WhatsApp…');
 }
@@ -571,18 +657,18 @@ function shareImage(inv){
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href=url; a.download=`${inv.id}.png`; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=> URL.revokeObjectURL(url), 5000);
-      const client = clients.find(c=>c.id===inv.clientId);
-      const phone = (inv.clientPhone || client?.phone || '').replace(/\D/g,'');
-      const msg = encodeURIComponent(`Invoice ${inv.id} image downloaded. Please attach in WhatsApp chat.\n\n${businessSettings.name}\n${businessSettings.phone}`);
-      window.open(`https://wa.me/${phone}?text=${msg}`,'_blank');
+      const cl = clients.find(c=>c.id===inv.clientId);
+      const phone = (inv.clientPhone || cl?.phone || '').replace(/\D/g,'');
+      const note = encodeURIComponent(`Invoice ${inv.id} image downloaded. Please attach in WhatsApp chat.\n\n${businessSettings.name}\n${businessSettings.phone}`);
+      window.open(`https://wa.me/${phone}?text=${note}`,'_blank');
       showToast('Invoice image downloaded. Attach in WhatsApp.');
       node.remove();
-    },'image/png');
+    }, 'image/png');
   }).catch(err=>{ console.error(err); node.remove(); showToast('Failed to generate image','error'); });
 }
 function buildInvoiceImage(inv){
-  const subtotal = inv.items.reduce((s,it)=>s+it.quantity*it.rate,0);
-  const remaining = Math.max(0,(inv.amount||0) - (inv.amountPaid||0));
+  const subtotal = inv.items.reduce((s,it)=> s + (it.quantity*it.rate), 0);
+  const remaining = Math.max(0,(inv.amount||0)-(inv.amountPaid||0));
   const client = clients.find(c=>c.id===inv.clientId);
   const wrap = document.createElement('div');
   wrap.className='invoice-template';
@@ -653,7 +739,7 @@ function buildInvoiceImage(inv){
   return wrap;
 }
 
-/* -------------------- Download Invoice -------------------- */
+/* ---------- Download Invoice ---------- */
 function downloadInvoice(id){
   const inv = invoices.find(i=>i.id===id);
   if (!inv) return showToast('Invoice not found','error');
@@ -665,20 +751,19 @@ function downloadInvoice(id){
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href=url; a.download=`${inv.id}.png`; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=> URL.revokeObjectURL(url), 5000);
-      hideLoading();
-      node.remove();
+      hideLoading(); node.remove();
       showToast(`Invoice ${inv.id} downloaded successfully!`);
-    },'image/png');
+    }, 'image/png');
   }).catch(err=>{
     console.error(err); node.remove(); hideLoading();
-    // CSV fallback
+    // Fallback CSV
     const rows = [
       ['Invoice', inv.id], ['Date', formatDate(inv.date)], ['Client', inv.client], ['Phone', inv.clientPhone||''], [],
       ['Description','Qty','Unit','Rate','Amount'],
       ...inv.items.map(it=>[it.description,it.quantity,it.unit,it.rate,(it.quantity*it.rate)])
     ];
     const csv = rows.map(r=> r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href=url; a.download=`${inv.id}.csv`; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=> URL.revokeObjectURL(url), 5000);
@@ -686,7 +771,7 @@ function downloadInvoice(id){
   });
 }
 
-/* -------------------- Edit/Delete Invoice -------------------- */
+/* ---------- Edit/Delete Invoice ---------- */
 function editInvoice(id){ openInvoiceModal(id); }
 function deleteInvoice(id){
   if (!confirm('Delete this invoice?')) return;
@@ -695,7 +780,7 @@ function deleteInvoice(id){
   renderInvoicesTable(); renderRecentInvoices(); updateDashboardStats(); saveAll();
 }
 
-/* -------------------- Inventory -------------------- */
+/* ---------- Inventory ---------- */
 function renderProductGrid(){
   const grid = document.getElementById('productGrid');
   if (!grid) return;
@@ -715,29 +800,36 @@ function renderProductGrid(){
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="font-weight:900;color:var(--text)">${formatCurrency(p.price)}/${escapeHtml(p.unit)}</div>
           <div style="display:flex;gap:8px;">
-            <button class="action-btn" title="Edit Product" onclick="openEditProduct('${p.id}')"><i class="fas fa-edit"></i></button>
-            <button class="action-btn" title="Delete Product" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+            <button class="action-btn" title="Open Details" onclick="openProductDetails('${p.id}')"><i class="fas fa-edit"></i></button>
+            <button class="action-btn" title="Delete" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
           </div>
         </div>
       </div>
     `;
   }).join('');
 }
-function openEditProduct(id){
+function updateInventoryStats(){
+  const units = products.reduce((s,p)=> s + (Number(p.stock)||0), 0);
+  const low = products.filter(p=> (p.stock||0)<=5 && (p.stock||0)>0).length;
+  const out = products.filter(p=> (p.stock||0)===0).length;
+  setText('#stockUnits', units);
+  setText('#lowStock', low);
+  setText('#outStock', out);
+}
+function openProductDetails(id){
   const p = products.find(x=>x.id===id); if (!p) return;
-  const name = prompt('Product Name', p.name); if (name===null) return;
-  const price = parseFloat(prompt('Rate per Unit', p.price)); if (isNaN(price)) return;
-  const unit = prompt('Unit (pcs/kg/ltr/service)', p.unit)||p.unit;
-  const stock = parseInt(prompt('Stock', p.stock)); if (isNaN(stock)) return;
-  const category = prompt('Category', p.category)||p.category;
-  p.name=name.trim(); p.price=price; p.unit=unit.trim(); p.stock=stock; p.category=category.trim();
-  showToast('Product updated');
-  renderProductGrid(); saveAll();
+  editingProductId = id;
+  goToSection('inventory-details');
+  document.getElementById('pd_name').value = p.name;
+  document.getElementById('pd_category').value = p.category || '';
+  document.getElementById('pd_unit').value = p.unit || '';
+  document.getElementById('pd_price').value = p.price || 0;
+  document.getElementById('pd_stock').value = p.stock || 0;
 }
 function deleteProduct(id){
   if (!confirm('Delete this product?')) return;
   products = products.filter(p=>p.id!==id);
-  showToast('Product deleted'); renderProductGrid(); saveAll();
+  showToast('Product deleted'); renderProductGrid(); updateInventoryStats(); saveAll();
 }
 
 /* Inventory search */
@@ -745,14 +837,13 @@ function initInventorySearch(){
   document.getElementById('productSearch')?.addEventListener('input', e=>{
     const term = e.target.value.toLowerCase();
     const filtered = products.filter(p=> p.name.toLowerCase().includes(term) || (p.category||'').toLowerCase().includes(term) || (p.unit||'').toLowerCase().includes(term));
-    const original = products; products = filtered; renderProductGrid(); products = original;
+    const orig = products; products = filtered; renderProductGrid(); products = orig;
   });
 }
 
 /* Import/Export Inventory */
 function initInventoryIO(){
-  const input = document.getElementById('importInventoryFile');
-  input?.addEventListener('change', handleInventoryImport);
+  document.getElementById('importInventoryFile')?.addEventListener('change', handleInventoryImport);
   document.getElementById('exportInventoryBtn')?.addEventListener('click', exportInventoryXLSX);
 }
 function handleInventoryImport(e){
@@ -780,7 +871,7 @@ function handleInventoryImport(e){
         added++;
       });
       hideLoading(); showToast(`Imported ${added} products`);
-      renderProductGrid(); updateDashboardStats(); saveAll();
+      renderProductGrid(); updateInventoryStats(); saveAll();
     }catch(err){ console.error(err); hideLoading(); showToast('Error importing inventory','error'); }
   };
   reader.readAsBinaryString(file);
@@ -796,7 +887,7 @@ function exportInventoryXLSX(){
   }catch(err){ console.error(err); showToast('Export failed','error'); }
 }
 
-/* -------------------- Clients -------------------- */
+/* ---------- Clients ---------- */
 function renderClientGrid(){
   const grid = document.getElementById('clientGrid');
   if (!grid) return;
@@ -816,21 +907,21 @@ function renderClientGrid(){
       <div style="color:var(--muted);font-size:14px;margin-bottom:8px;"><i class="fas fa-phone" style="width:16px;margin-right:6px;color:var(--primary)"></i>${escapeHtml(c.phone||'-')}</div>
       <div style="color:var(--muted);font-size:14px;margin-bottom:12px;"><i class="fas fa-map-marker-alt" style="width:16px;margin-right:6px;color:var(--primary)"></i>${escapeHtml(c.address||'-')}</div>
       <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="action-btn" title="Edit Client" onclick="openEditClient('${c.id}')"><i class="fas fa-edit"></i></button>
+        <button class="action-btn" title="Open Details" onclick="openClientDetails('${c.id}')"><i class="fas fa-edit"></i></button>
         <button class="action-btn" title="Invoice" onclick="createInvoiceForClient('${c.id}')"><i class="fas fa-file-invoice"></i></button>
         <button class="action-btn" title="Delete" onclick="deleteClient('${c.id}')"><i class="fas fa-trash"></i></button>
       </div>
     </div>
   `).join('');
 }
-function openEditClient(id){
+function openClientDetails(id){
   const c = clients.find(x=>x.id===id); if (!c) return;
-  const name = prompt('Client Name', c.name); if (name===null) return;
-  const phone = prompt('Phone', c.phone||''); if (phone===null) return;
-  const email = prompt('Email', c.email||''); if (email===null) return;
-  const address = prompt('Address', c.address||''); if (address===null) return;
-  c.name=name.trim(); c.phone=phone.trim(); c.email=email.trim(); c.address=address.trim();
-  showToast('Client updated'); renderClientGrid(); saveAll();
+  editingClientId = id;
+  goToSection('client-details');
+  document.getElementById('cd_name').value = c.name || '';
+  document.getElementById('cd_phone').value = c.phone || '';
+  document.getElementById('cd_email').value = c.email || '';
+  document.getElementById('cd_address').value = c.address || '';
 }
 function deleteClient(id){
   if (!confirm('Delete this client?')) return;
@@ -838,26 +929,26 @@ function deleteClient(id){
   showToast('Client deleted'); renderClientGrid(); saveAll();
 }
 function createInvoiceForClient(id){
+  const c = clients.find(x=>x.id===id);
   openInvoiceModal();
-  const c = clients.find(x=>x.id===id); if (!c) return;
+  if (!c) return;
   const name = document.getElementById('invoiceClient');
   const phone = document.getElementById('clientPhoneInput');
   name.value = c.name; name.dataset.clientId = c.id; phone.value = c.phone||'';
 }
 
-/* Clients search */
+/* Client search */
 function initClientSearch(){
   document.getElementById('clientSearch')?.addEventListener('input', e=>{
     const term = e.target.value.toLowerCase();
     const filtered = clients.filter(c=> c.name.toLowerCase().includes(term) || (c.email||'').toLowerCase().includes(term) || (c.phone||'').includes(term));
-    const original = clients; clients = filtered; renderClientGrid(); clients = original;
+    const orig = clients; clients = filtered; renderClientGrid(); clients = orig;
   });
 }
 
 /* Import/Export Clients */
 function initClientsIO(){
-  const input = document.getElementById('importClientsFile');
-  input?.addEventListener('change', handleClientsImport);
+  document.getElementById('importClientsFile')?.addEventListener('change', handleClientsImport);
   document.getElementById('exportClientsBtn')?.addEventListener('click', exportClientsXLSX);
 }
 function handleClientsImport(e){
@@ -900,7 +991,51 @@ function exportClientsXLSX(){
   }catch(err){ console.error(err); showToast('Export failed','error'); }
 }
 
-/* -------------------- Settings -------------------- */
+/* ---------- Client & Product Details Save ---------- */
+function initDetailForms(){
+  document.getElementById('clientDetailsForm')?.addEventListener('submit', e=>{
+    e.preventDefault();
+    if (!editingClientId) return goToSection('clients');
+    const c = clients.find(x=>x.id===editingClientId); if (!c) return;
+    c.name = document.getElementById('cd_name').value.trim();
+    c.phone = document.getElementById('cd_phone').value.trim();
+    c.email = document.getElementById('cd_email').value.trim();
+    c.address = document.getElementById('cd_address').value.trim();
+    showToast('Client saved'); saveAll(); renderClientGrid(); goToSection('clients');
+    editingClientId = null;
+  });
+  document.getElementById('productDetailsForm')?.addEventListener('submit', e=>{
+    e.preventDefault();
+    if (!editingProductId) return goToSection('inventory');
+    const p = products.find(x=>x.id===editingProductId); if (!p) return;
+    p.name = document.getElementById('pd_name').value.trim();
+    p.category = document.getElementById('pd_category').value.trim();
+    p.unit = document.getElementById('pd_unit').value.trim() || 'pcs';
+    p.price = parseFloat(document.getElementById('pd_price').value)||0;
+    p.stock = parseInt(document.getElementById('pd_stock').value)||0;
+    showToast('Product saved'); saveAll(); renderProductGrid(); updateInventoryStats(); goToSection('inventory');
+    editingProductId = null;
+  });
+}
+
+/* ---------- Reports (full page) ---------- */
+function renderReports(){
+  const revenue = invoices.reduce((s,i)=> s + (i.amount||0), 0);
+  const pending = invoices.reduce((s,i)=> s + Math.max(0,(i.amount||0)-(i.amountPaid||0)), 0);
+  const count = invoices.length;
+  const paid = invoices.filter(i=>i.status==='paid').length;
+  const pendCount = invoices.filter(i=>i.status==='pending').length;
+  const overdue = invoices.filter(i=>i.status==='overdue').length;
+
+  setText('#repRevenue', formatCurrency(revenue));
+  setText('#repPending', formatCurrency(pending));
+  setText('#repCount', count);
+  setText('#repPaid', paid);
+  setText('#repPendCount', pendCount);
+  setText('#repOverdue', overdue);
+}
+
+/* ---------- Settings ---------- */
 function loadBusinessSettings(){
   document.getElementById('businessName').value = businessSettings.name;
   document.getElementById('businessEmail').value = businessSettings.email;
@@ -908,9 +1043,8 @@ function loadBusinessSettings(){
   document.getElementById('businessGST').value = businessSettings.gst;
   document.getElementById('businessWebsite').value = businessSettings.website;
   document.getElementById('businessAddress').value = businessSettings.address;
-  const preview = document.getElementById('logoPreview');
   if (businessSettings.logo){
-    preview.innerHTML = `<img src="${businessSettings.logo}" style="width:100px;height:100px;object-fit:cover;border-radius:8px;">`;
+    document.getElementById('logoPreview').innerHTML = `<img src="${businessSettings.logo}" style="width:100px;height:100px;object-fit:cover;border-radius:8px;">`;
   }
 }
 function initSettings(){
@@ -933,42 +1067,31 @@ function initSettings(){
     };
     reader.readAsDataURL(f);
   });
-  document.getElementById('themeSelector')?.addEventListener('change', e=>{
-    const v = e.target.value;
-    if (v==='Light') document.documentElement.style.colorScheme = 'light';
-    else if (v==='Dark') document.documentElement.style.colorScheme = 'dark';
-    else document.documentElement.style.colorScheme = '';
-  });
-  document.getElementById('connectWhatsappBtn')?.addEventListener('click', ()=> showToast('WhatsApp number saved (uses WhatsApp Web)'));
 }
 
-/* -------------------- Reports (quick) -------------------- */
-function initReports(){
-  document.getElementById('viewReports')?.addEventListener('click', ()=>{
-    const total = invoices.length;
-    const paid = invoices.filter(i=>i.status==='paid').length;
-    const overdue = invoices.filter(i=>i.status==='overdue').length;
-    showToast(`Reports — Total: ${total}, Paid: ${paid}, Overdue: ${overdue}`, 'info');
-  });
+/* ---------- Quick Actions ---------- */
+function initQuickActions(){
+  document.getElementById('viewReports')?.addEventListener('click', ()=> goToSection('reports'));
+  // two disabled buttons left as-is per requirement
 }
 
-/* -------------------- Storage -------------------- */
+/* ---------- Storage ---------- */
 function saveAll(){
-  localStorage.setItem('bills_invoices', JSON.stringify(invoices));
-  localStorage.setItem('bills_products', JSON.stringify(products));
-  localStorage.setItem('bills_clients', JSON.stringify(clients));
-  localStorage.setItem('bills_settings', JSON.stringify(businessSettings));
+  localStorage.setItem('ub_invoices', JSON.stringify(invoices));
+  localStorage.setItem('ub_products', JSON.stringify(products));
+  localStorage.setItem('ub_clients', JSON.stringify(clients));
+  localStorage.setItem('ub_settings', JSON.stringify(businessSettings));
 }
 function loadAll(){
   try{
-    const a = localStorage.getItem('bills_invoices'); if (a) invoices = JSON.parse(a);
-    const b = localStorage.getItem('bills_products'); if (b) products = JSON.parse(b);
-    const c = localStorage.getItem('bills_clients'); if (c) clients = JSON.parse(c);
-    const d = localStorage.getItem('bills_settings'); if (d) businessSettings = { ...businessSettings, ...JSON.parse(d) };
-  }catch(e){ console.warn('LocalStorage parse error', e); }
+    const a = localStorage.getItem('ub_invoices'); if (a) invoices = JSON.parse(a);
+    const b = localStorage.getItem('ub_products'); if (b) products = JSON.parse(b);
+    const c = localStorage.getItem('ub_clients'); if (c) clients = JSON.parse(c);
+    const d = localStorage.getItem('ub_settings'); if (d) businessSettings = { ...businessSettings, ...JSON.parse(d) };
+  }catch(e){ console.warn('Storage parse error', e); }
 }
 
-/* -------------------- Keyboard -------------------- */
+/* ---------- Keyboard ---------- */
 function initHotkeys(){
   document.addEventListener('keydown', e=>{
     if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='n'){ e.preventDefault(); openInvoiceModal(); }
@@ -976,7 +1099,7 @@ function initHotkeys(){
   });
 }
 
-/* -------------------- Boot -------------------- */
+/* ---------- Init ---------- */
 function initApp(){
   loadAll();
   initNavigation();
@@ -987,16 +1110,24 @@ function initApp(){
   initInventoryIO();
   initClientsIO();
   initSettings();
-  initReports();
+  initDetailForms();
+  initQuickActions();
+  initHotkeys();
+
   updateDashboardStats();
   renderRecentInvoices();
   renderProductGrid();
+  updateInventoryStats();
   renderClientGrid();
-  // Initial welcome
-  setTimeout(()=> showToast(`Welcome to Bills v${businessSettings.version}`, 'success'), 400);
+  renderReports();
+
+  // Welcome toast (correct version/build)
+  setTimeout(()=>{
+    showToast(`Welcome to UniBills — Version ${businessSettings.version} (Build ${businessSettings.build})`, 'success');
+  }, 500);
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
 
 /* expose minimal api */
-window.BillsApp = { downloadInvoice, openWhatsappModal, shareInvoiceFormat };
+window.BillsApp = { openWhatsappModal, shareInvoiceFormat, downloadInvoice, openClientDetails, openProductDetails };
