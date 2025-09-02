@@ -122,13 +122,13 @@ body{
   box-shadow:0 0 0 2px rgba(66,133,244,.2);
 }
 
-/* Premium search bars */
+/* Premium search bars (elevated pill) */
 .search-box.search-elevated{
   position:relative; display:flex; align-items:center;
   background:var(--panel);
   border:1px solid var(--border); border-radius:999px;
   padding:8px 14px 8px 40px; min-width:280px;
-  box-shadow:0 3px 10px rgba(60,64,67,.1);
+  box-shadow:0 3px 10px rgba(60,64,67,.1); /* elevated look [4] */
   transition:var(--t);
 }
 .search-box.search-elevated i{
@@ -171,7 +171,7 @@ body{
 .stat-change.positive{color:var(--success)}
 .stat-change.negative{color:var(--error)}
 
-/* Dashboard 2-col */
+/* Two-column dashboard */
 .dashboard-content{display:grid;grid-template-columns:2fr 1fr;gap:24px}
 
 /* Invoice list (dashboard) */
@@ -242,14 +242,12 @@ body{
 .settings-card{background:var(--panel);border-radius:var(--r12);padding:24px;box-shadow:var(--shadow-1)}
 .settings-card h2{display:flex;align-items:center;gap:10px;color:var(--primary);font-weight:900;font-size:18px;margin-bottom:16px}
 .settings-card h2 i{color:var(--primary)}
-
 .logo-upload-container{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .logo-preview{
   width:100px;height:100px;border:2px dashed var(--border);border-radius:var(--r8);
   display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;color:var(--muted);font-size:12px;
 }
 .logo-preview i{opacity:.7}
-
 .about-info{display:grid;gap:8px}
 .about-info p{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);color:var(--muted)}
 .about-info p:last-child{border-bottom:none}
@@ -295,6 +293,22 @@ body{
 .summary-row.tax-discount label{display:inline-flex;align-items:center;gap:6px;color:var(--text)}
 .summary-row.total{font-size:18px;font-weight:900;border-top:1px solid var(--border);padding-top:10px}
 
+/* Date Shortcuts (under date input) */
+#dateShortcuts{
+  position:relative;
+  display:none; /* toggled by JS */
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--r8);
+  box-shadow:var(--shadow-2);
+  margin-top:6px;
+  overflow:hidden;
+}
+#dateShortcuts .dropdown-item{
+  border-bottom:1px solid var(--border);
+}
+#dateShortcuts .dropdown-item:last-child{border-bottom:none}
+
 /* Modals */
 .modal{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
@@ -318,8 +332,21 @@ body{
 .modal-body{padding:20px 22px}
 .modal-footer{padding:14px 22px;border-top:1px solid var(--border);background:var(--panel-2);display:flex;justify-content:flex-end;gap:12px}
 
-/* Reports page adjustments (reusing cards/stats) */
-/* Already covered by .stats-grid, .stat-card, .inventory-stat */
+/* WhatsApp share */
+.share-options{display:grid;gap:12px}
+.share-option-btn{
+  position:relative;display:flex;align-items:center;gap:12px;
+  padding:16px;background:var(--panel-2);border:1px solid var(--border);
+  border-radius:var(--r8);cursor:pointer;transition:var(--t)
+}
+.share-option-btn:hover{background:var(--primary);color:#fff;transform:translateY(-1px);box-shadow:var(--shadow-2)}
+.share-option-btn i{font-size:20px}
+.share-option-btn small{color:var(--muted)}
+.share-option-btn:hover small{color:rgba(255,255,255,.9)}
+.new-badge{
+  position:absolute;top:-6px;right:-6px;background:var(--error);
+  color:#fff;font-size:10px;font-weight:900;padding:2px 6px;border-radius:10px;letter-spacing:.4px;
+}
 
 /* Hidden Invoice Template (for html2canvas) */
 .invoice-template{
