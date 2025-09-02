@@ -1,1220 +1,932 @@
-/**
- * UniBills v1.0 Elite - Universal Invoice Management System
- * 
- * @author Anas Lila
- * @company AL Software
- * @version 1.0 Elite
- * @date September 02, 2025
- * @license Premium Software - All Rights Reserved
- */
-
-'use strict';
-
-class UniBillsCore {
-    constructor() {
-        // Core Configuration
-        this.version = '1.0 Elite';
-        this.developer = 'Anas Lila';
-        this.company = 'AL Software';
-        this.supportNumber = '+91 8879706046';
-        
-        // User State Management
-        this.user = {
-            isLoggedIn: false,
-            email: null,
-            name: null,
-            isPremium: false,
-            preferences: {
-                theme: localStorage.getItem('unibills_theme') || 'apple',
-                currency: 'INR',
-                dateFormat: 'DD/MM/YYYY'
-            }
-        };
-
-        // Application State
-        this.state = {
-            currentTab: 'pos',
-            invoiceData: {},
-            customers: this.loadFromStorage('customers', []),
-            products: this.loadFromStorage('products', []),
-            invoices: this.loadFromStorage('invoices', []),
-            counters: this.loadFromStorage('counters', {
-                INV: 1001, PROF: 2001, PROP: 3001, QUO: 4001
-            })
-        };
-
-        // Premium Users Database
-        this.premiumUsers = [
-            { name: 'Anas Lila', email: 'anas.lila@example.com', password: 'admin123' },
-            { name: 'Admin User', email: 'admin@unibills.com', password: 'admin123' },
-            { name: 'Demo Premium', email: 'demo.premium@gmail.com', password: 'demo123' },
-            { name: 'John Smith', email: 'john.smith@business.com', password: 'john2025' },
-            { name: 'Sarah Wilson', email: 'sarah.wilson@company.in', password: 'sarah123' },
-            { name: 'Anas', email: 'lilaanas6@gmail.com', password: 'anas123' }
-        ];
-
-        // Company Themes
-        this.themes = {
-            apple: {
-                name: 'Apple Inc.',
-                logo: 'https://cdn3.iconfinder.com/data/icons/social-media-logos-glyph/2048/5315_-_Apple-512.png',
-                colors: { primary: '#007AFF', secondary: '#5856D6' }
-            },
-            google: {
-                name: 'Google LLC',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
-                colors: { primary: '#4285F4', secondary: '#34A853' }
-            },
-            meta: {
-                name: 'Meta Platforms',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/2560px-Meta_Platforms_Inc._logo.svg.png',
-                colors: { primary: '#1877F2', secondary: '#42B883' }
-            },
-            amazon: {
-                name: 'Amazon.com Inc.',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/1280px-Amazon_logo.svg.png',
-                colors: { primary: '#FF9900', secondary: '#146EB4' }
-            },
-            zomato: {
-                name: 'Zomato Ltd.',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Zomato_Logo.svg/1200px-Zomato_Logo.svg.png',
-                colors: { primary: '#E23744', secondary: '#FF7E8B' }
-            }
-        };
-
-        // Initialize Application
-        this.initialize();
+// Global Variables
+let invoices = [
+    {
+        id: 'INV-001',
+        client: 'Acme Corp',
+        clientId: 'acme',
+        date: '2025-09-01',
+        amount: 25000,
+        status: 'paid',
+        items: [
+            { description: 'Web Development', quantity: 1, rate: 25000 }
+        ]
+    },
+    {
+        id: 'INV-002',
+        client: 'Tech Solutions',
+        clientId: 'tech',
+        date: '2025-08-28',
+        amount: 18500,
+        status: 'pending',
+        items: [
+            { description: 'UI/UX Design', quantity: 1, rate: 18500 }
+        ]
+    },
+    {
+        id: 'INV-003',
+        client: 'Digital Agency',
+        clientId: 'digital',
+        date: '2025-08-25',
+        amount: 32000,
+        status: 'overdue',
+        items: [
+            { description: 'Mobile App Development', quantity: 1, rate: 32000 }
+        ]
     }
+];
 
-    /**
-     * Initialize the application
-     */
-    initialize() {
-        this.bindEvents();
-        this.setupPWA();
-        this.displayLoginScreen();
-        this.initializeThemes();
-        console.log(`UniBills ${this.version} initialized successfully`);
+let products = [
+    {
+        id: 'PRD-001',
+        name: 'Website Development Package',
+        price: 25000,
+        stock: 10,
+        category: 'Services'
+    },
+    {
+        id: 'PRD-002',
+        name: 'Mobile App Development',
+        price: 45000,
+        stock: 5,
+        category: 'Services'
+    },
+    {
+        id: 'PRD-003',
+        name: 'Logo Design',
+        price: 5000,
+        stock: 0,
+        category: 'Design'
+    },
+    {
+        id: 'PRD-004',
+        name: 'SEO Optimization',
+        price: 12000,
+        stock: 3,
+        category: 'Marketing'
     }
+];
 
-    /**
-     * Load data from localStorage with error handling
-     */
-    loadFromStorage(key, defaultValue) {
-        try {
-            const stored = localStorage.getItem(`unibills_${key}`);
-            return stored ? JSON.parse(stored) : defaultValue;
-        } catch (error) {
-            console.error(`Error loading ${key}:`, error);
-            return defaultValue;
+let clients = [
+    {
+        id: 'acme',
+        name: 'Acme Corp',
+        email: 'contact@acme.com',
+        phone: '+91 9876543210',
+        address: '123 Business Street, Mumbai'
+    },
+    {
+        id: 'tech',
+        name: 'Tech Solutions',
+        email: 'info@techsolutions.com',
+        phone: '+91 9876543211',
+        address: '456 Tech Park, Bangalore'
+    },
+    {
+        id: 'digital',
+        name: 'Digital Agency',
+        email: 'hello@digitalagency.com',
+        phone: '+91 9876543212',
+        address: '789 Digital Hub, Delhi'
+    }
+];
+
+// Utility Functions
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0
+    }).format(amount);
+}
+
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+function generateInvoiceId() {
+    const count = invoices.length + 1;
+    return `INV-${count.toString().padStart(3, '0')}`;
+}
+
+function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const iconClass = type === 'success' ? 'fa-check-circle' : 
+                     type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    
+    toast.innerHTML = `
+        <i class="fas ${iconClass} toast-icon"></i>
+        <span class="toast-message">${message}</span>
+        <button class="toast-close">&times;</button>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
         }
-    }
-
-    /**
-     * Save data to localStorage with error handling
-     */
-    saveToStorage(key, data) {
-        try {
-            localStorage.setItem(`unibills_${key}`, JSON.stringify(data));
-            return true;
-        } catch (error) {
-            console.error(`Error saving ${key}:`, error);
-            this.showNotification('Storage error occurred', 'error');
-            return false;
+    }, 5000);
+    
+    // Manual close
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
         }
-    }
+    });
+}
 
-    /**
-     * Bind all event listeners
-     */
-    bindEvents() {
-        // Authentication Events
-        this.bindElement('#login-form', 'submit', this.handleLogin.bind(this));
-        this.bindElement('#logout-btn', 'click', this.handleLogout.bind(this));
+function showLoading() {
+    document.getElementById('loadingSpinner').classList.add('active');
+}
 
-        // Navigation Events
-        this.bindElements('.nav-tab', 'click', this.handleTabSwitch.bind(this));
+function hideLoading() {
+    document.getElementById('loadingSpinner').classList.remove('active');
+}
 
-        // Theme Selection Events
-        this.bindElements('.theme-option', 'click', this.handleThemeSelection.bind(this));
-
-        // Invoice Events
-        this.bindElements('.add-item-btn', 'click', this.addInvoiceItem.bind(this));
-        this.bindElement('#pos-preview', 'click', this.previewInvoice.bind(this));
-        this.bindElement('#pos-save', 'click', this.saveInvoice.bind(this));
-        this.bindElement('#pos-print', 'click', this.printInvoice.bind(this));
-
-        // Dynamic calculation events
-        document.addEventListener('input', this.handleInputChange.bind(this));
-        document.addEventListener('click', this.handleDynamicClicks.bind(this));
-
-        // Support and upgrade events
-        this.bindElements('.upgrade-link', 'click', this.handleUpgrade.bind(this));
-        this.bindElement('#support-btn', 'click', this.handleSupport.bind(this));
-        this.bindElement('#change-password-btn', 'click', this.handlePasswordChange.bind(this));
-    }
-
-    /**
-     * Utility function to bind single element
-     */
-    bindElement(selector, event, handler) {
-        const element = document.querySelector(selector);
-        if (element) {
-            element.addEventListener(event, handler);
-        }
-    }
-
-    /**
-     * Utility function to bind multiple elements
-     */
-    bindElements(selector, event, handler) {
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(element => {
-            element.addEventListener(event, handler);
-        });
-    }
-
-    /**
-     * Handle user login
-     */
-    async handleLogin(event) {
-        event.preventDefault();
-        
-        const formData = this.getFormData('#login-form');
-        const { name, email, password } = formData;
-
-        // Validation
-        if (!this.validateLoginForm(name, email, password)) return;
-
-        // Show loading
-        this.setLoginLoading(true);
-
-        try {
-            // Simulate API call delay
-            await this.delay(1000);
-
-            const isPremium = this.authenticateUser(email.toLowerCase(), password);
+// Navigation Functions
+function initNavigation() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.content-section');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
             
-            if (isPremium !== null) {
-                this.user = {
-                    isLoggedIn: true,
-                    email: email.toLowerCase(),
-                    name: name,
-                    isPremium: isPremium
-                };
-
-                this.onLoginSuccess(isPremium);
-            } else {
-                throw new Error('Invalid credentials');
+            // Remove active class from all links and sections
+            navLinks.forEach(l => l.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+            
+            // Add active class to clicked link
+            link.classList.add('active');
+            
+            // Show corresponding section
+            const sectionId = link.getAttribute('data-section') + '-section';
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                
+                // Load section-specific data
+                loadSectionData(link.getAttribute('data-section'));
             }
-        } catch (error) {
-            this.showNotification(error.message, 'error');
-        } finally {
-            this.setLoginLoading(false);
-        }
-    }
-
-    /**
-     * Validate login form
-     */
-    validateLoginForm(name, email, password) {
-        if (!name || name.length < 2) {
-            this.showNotification('Please enter a valid name', 'error');
-            return false;
-        }
-        
-        if (!this.isValidEmail(email)) {
-            this.showNotification('Please enter a valid email address', 'error');
-            return false;
-        }
-        
-        if (!password || password.length < 6) {
-            this.showNotification('Password must be at least 6 characters', 'error');
-            return false;
-        }
-        
-        return true;
-    }
-
-    /**
-     * Authenticate user
-     */
-    authenticateUser(email, password) {
-        const premiumUser = this.premiumUsers.find(user => 
-            user.email.toLowerCase() === email && user.password === password
-        );
-        
-        if (premiumUser) {
-            return true; // Premium user
-        }
-        
-        // Allow any valid email/password combo as free user
-        if (this.isValidEmail(email) && password.length >= 6) {
-            return false; // Free user
-        }
-        
-        return null; // Invalid
-    }
-
-    /**
-     * Handle successful login
-     */
-    onLoginSuccess(isPremium) {
-        if (isPremium) {
-            this.showCelebration();
-        }
-
-        this.updateUserInterface();
-        this.hideLoginModal();
-        this.showMainApp();
-        this.initializeInvoiceForm();
-        
-        const userType = isPremium ? 'Premium' : 'Free';
-        this.showNotification(`Welcome ${this.user.name}! You have ${userType} access.`, 'success');
-    }
-
-    /**
-     * Handle user logout
-     */
-    handleLogout() {
-        this.user = {
-            isLoggedIn: false,
-            email: null,
-            name: null,
-            isPremium: false
-        };
-
-        this.hideMainApp();
-        this.showLoginModal();
-        this.resetForms();
-        this.showNotification('Logged out successfully', 'success');
-    }
-
-    /**
-     * Handle tab switching
-     */
-    handleTabSwitch(event) {
-        const tabName = event.currentTarget.dataset.tab;
-        
-        if (!this.user.isPremium && ['professional', 'realestate', 'more'].includes(tabName)) {
-            this.showUpgradePrompt(tabName);
-            return;
-        }
-
-        this.switchTab(tabName);
-    }
-
-    /**
-     * Switch to specified tab
-     */
-    switchTab(tabName) {
-        // Remove active class from all tabs
-        document.querySelectorAll('.nav-tab').forEach(tab => {
-            tab.classList.remove('active');
         });
+    });
+}
 
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-
-        // Activate selected tab
-        const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
-        const activeContent = document.getElementById(`${tabName}-tab`);
-
-        if (activeTab && activeContent) {
-            activeTab.classList.add('active');
-            activeContent.classList.add('active');
-            this.state.currentTab = tabName;
-        }
+function loadSectionData(section) {
+    switch(section) {
+        case 'dashboard':
+            updateDashboardStats();
+            renderRecentInvoices();
+            break;
+        case 'invoices':
+            renderInvoicesTable();
+            break;
+        case 'inventory':
+            renderProductGrid();
+            break;
+        case 'clients':
+            renderClientGrid();
+            break;
     }
+}
 
-    /**
-     * Handle theme selection
-     */
-    handleThemeSelection(event) {
-        const theme = event.currentTarget.dataset.theme;
-        this.selectTheme(theme);
-    }
+// Dashboard Functions
+function updateDashboardStats() {
+    const totalRevenue = invoices.reduce((sum, invoice) => 
+        invoice.status === 'paid' ? sum + invoice.amount : sum, 0);
+    
+    const pendingAmount = invoices.reduce((sum, invoice) => 
+        invoice.status !== 'paid' ? sum + invoice.amount : sum, 0);
+    
+    const totalInvoices = invoices.length;
+    const totalProducts = products.reduce((sum, product) => sum + product.stock, 0);
+    
+    // Update stat cards (simplified - in real app would animate)
+    const stats = document.querySelectorAll('.stat-number');
+    if (stats[0]) stats[0].textContent = formatCurrency(totalRevenue);
+    if (stats[1]) stats[1].textContent = totalInvoices;
+    if (stats[2]) stats[2].textContent = formatCurrency(pendingAmount);
+    if (stats[3]) stats[3].textContent = totalProducts;
+}
 
-    /**
-     * Select and apply theme
-     */
-    selectTheme(themeName) {
-        this.user.preferences.theme = themeName;
-        this.saveToStorage('theme', themeName);
-
-        // Update UI
-        document.querySelectorAll('.theme-option').forEach(option => {
-            option.classList.remove('active');
-        });
-
-        const selectedTheme = document.querySelector(`[data-theme="${themeName}"]`);
-        if (selectedTheme) {
-            selectedTheme.classList.add('active');
-        }
-
-        this.showNotification(`Theme changed to ${this.themes[themeName]?.name || themeName}`, 'success');
-    }
-
-    /**
-     * Initialize themes
-     */
-    initializeThemes() {
-        const savedTheme = this.user.preferences.theme;
-        if (savedTheme) {
-            this.selectTheme(savedTheme);
-        }
-    }
-
-    /**
-     * Add invoice item
-     */
-    addInvoiceItem(event) {
-        const type = this.state.currentTab;
-        
-        // Check free user limitations
-        if (!this.user.isPremium && type === 'pos') {
-            const currentItems = document.querySelectorAll('#pos-items-tbody tr').length;
-            if (currentItems >= 3) {
-                this.showFreeLimitation();
-                return;
-            }
-        }
-
-        const tbody = document.getElementById(`${type}-items-tbody`);
-        if (!tbody) return;
-
-        const row = this.createInvoiceItemRow();
-        tbody.appendChild(row);
-
-        // Focus on first input
-        const firstInput = row.querySelector('input');
-        if (firstInput) firstInput.focus();
-    }
-
-    /**
-     * Create invoice item row
-     */
-    createInvoiceItemRow() {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>
-                <input type="text" 
-                       placeholder="Enter product or service" 
-                       class="item-product" 
-                       required>
-            </td>
-            <td>
-                <input type="number" 
-                       placeholder="1" 
-                       class="item-quantity" 
-                       min="1" 
-                       value="1" 
-                       required>
-            </td>
-            <td>
-                <input type="number" 
-                       placeholder="0.00" 
-                       class="item-rate currency-input" 
-                       step="0.01" 
-                       min="0"
-                       required>
-            </td>
-            <td>
-                <input type="number" 
-                       placeholder="0.00" 
-                       class="item-amount currency-input" 
-                       step="0.01" 
-                       readonly 
-                       tabindex="-1">
-            </td>
-            <td>
-                <button type="button" 
-                        class="remove-item-btn" 
-                        title="Remove item">
-                    <i class="fas fa-trash"></i>
+function renderRecentInvoices() {
+    const invoiceList = document.querySelector('.invoice-list');
+    if (!invoiceList) return;
+    
+    const recentInvoices = invoices.slice(-3).reverse();
+    
+    invoiceList.innerHTML = recentInvoices.map(invoice => `
+        <div class="invoice-item">
+            <div class="invoice-info">
+                <h4 class="invoice-number">${invoice.id}</h4>
+                <p class="invoice-client">${invoice.client}</p>
+            </div>
+            <div class="invoice-amount">${formatCurrency(invoice.amount)}</div>
+            <div class="invoice-status status-${invoice.status}">${invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}</div>
+            <div class="invoice-actions">
+                <button class="action-btn" title="Share on WhatsApp" onclick="shareOnWhatsApp('${invoice.id}')">
+                    <i class="fab fa-whatsapp"></i>
                 </button>
+                <button class="action-btn" title="Download PDF" onclick="downloadInvoice('${invoice.id}')">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Invoice Functions
+function renderInvoicesTable() {
+    const tableBody = document.getElementById('invoiceTableBody');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = invoices.map(invoice => `
+        <tr>
+            <td><strong>${invoice.id}</strong></td>
+            <td>${invoice.client}</td>
+            <td>${formatDate(invoice.date)}</td>
+            <td><strong>${formatCurrency(invoice.amount)}</strong></td>
+            <td><span class="invoice-status status-${invoice.status}">${invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}</span></td>
+            <td>
+                <div class="invoice-actions">
+                    <button class="action-btn" title="Edit" onclick="editInvoice('${invoice.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn" title="Share on WhatsApp" onclick="shareOnWhatsApp('${invoice.id}')">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>
+                    <button class="action-btn" title="Download PDF" onclick="downloadInvoice('${invoice.id}')">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="action-btn" title="Delete" onclick="deleteInvoice('${invoice.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </td>
+        </tr>
+    `).join('');
+}
+
+function initInvoiceSearch() {
+    const searchInput = document.getElementById('invoiceSearch');
+    const filterSelect = document.getElementById('invoiceFilter');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', filterInvoices);
+    }
+    
+    if (filterSelect) {
+        filterSelect.addEventListener('change', filterInvoices);
+    }
+}
+
+function filterInvoices() {
+    const searchTerm = document.getElementById('invoiceSearch')?.value.toLowerCase() || '';
+    const statusFilter = document.getElementById('invoiceFilter')?.value || 'all';
+    
+    let filteredInvoices = invoices.filter(invoice => {
+        const matchesSearch = invoice.id.toLowerCase().includes(searchTerm) ||
+                            invoice.client.toLowerCase().includes(searchTerm);
+        const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
+        
+        return matchesSearch && matchesStatus;
+    });
+    
+    renderFilteredInvoices(filteredInvoices);
+}
+
+function renderFilteredInvoices(filteredInvoices) {
+    const tableBody = document.getElementById('invoiceTableBody');
+    if (!tableBody) return;
+    
+    if (filteredInvoices.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <i class="fas fa-search" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>
+                    No invoices found matching your criteria
+                </td>
+            </tr>
         `;
-
-        return row;
+        return;
     }
+    
+    tableBody.innerHTML = filteredInvoices.map(invoice => `
+        <tr>
+            <td><strong>${invoice.id}</strong></td>
+            <td>${invoice.client}</td>
+            <td>${formatDate(invoice.date)}</td>
+            <td><strong>${formatCurrency(invoice.amount)}</strong></td>
+            <td><span class="invoice-status status-${invoice.status}">${invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}</span></td>
+            <td>
+                <div class="invoice-actions">
+                    <button class="action-btn" title="Edit" onclick="editInvoice('${invoice.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn" title="Share on WhatsApp" onclick="shareOnWhatsApp('${invoice.id}')">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>
+                    <button class="action-btn" title="Download PDF" onclick="downloadInvoice('${invoice.id}')">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="action-btn" title="Delete" onclick="deleteInvoice('${invoice.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
 
-    /**
-     * Handle input changes
-     */
-    handleInputChange(event) {
-        const target = event.target;
-        
-        // Calculate item amounts
-        if (target.classList.contains('item-quantity') || target.classList.contains('item-rate')) {
-            this.calculateItemAmount(target);
+// Modal Functions
+function initModal() {
+    const modal = document.getElementById('invoiceModal');
+    const openButtons = document.querySelectorAll('#createInvoiceBtn, #newInvoiceBtn, #quickInvoice');
+    const closeButton = document.getElementById('closeModal');
+    const cancelButton = document.getElementById('cancelModal');
+    
+    openButtons.forEach(button => {
+        button.addEventListener('click', openInvoiceModal);
+    });
+    
+    if (closeButton) closeButton.addEventListener('click', closeInvoiceModal);
+    if (cancelButton) cancelButton.addEventListener('click', closeInvoiceModal);
+    
+    // Close modal when clicking outside
+    modal?.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeInvoiceModal();
         }
+    });
+    
+    // Initialize form handlers
+    initInvoiceForm();
+}
 
-        // Format currency inputs
-        if (target.classList.contains('currency-input') && !target.readOnly) {
-            this.formatCurrencyInput(target);
-        }
-
-        // Update totals when items change
-        if (target.closest('.items-table')) {
-            this.updateInvoiceTotals();
-        }
+function openInvoiceModal() {
+    const modal = document.getElementById('invoiceModal');
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Set today's date
+    const dateInput = document.getElementById('invoiceDate');
+    if (dateInput) {
+        dateInput.value = new Date().toISOString().split('T')[0];
     }
+    
+    // Reset form
+    resetInvoiceForm();
+}
 
-    /**
-     * Handle dynamic clicks
-     */
-    handleDynamicClicks(event) {
-        const target = event.target.closest('button');
-        if (!target) return;
+function closeInvoiceModal() {
+    const modal = document.getElementById('invoiceModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
 
-        // Remove item buttons
-        if (target.classList.contains('remove-item-btn')) {
-            this.removeInvoiceItem(target);
+function resetInvoiceForm() {
+    const form = document.getElementById('invoiceForm');
+    if (form) form.reset();
+    
+    // Reset items to one row
+    const itemsContainer = document.querySelector('.invoice-items');
+    const firstItem = itemsContainer.querySelector('.item-row');
+    const allItems = itemsContainer.querySelectorAll('.item-row');
+    
+    // Remove all items except the first one
+    allItems.forEach((item, index) => {
+        if (index > 0) {
+            item.remove();
         }
-
-        // Modal close buttons
-        if (target.classList.contains('close-modal')) {
-            this.closeModal(target);
-        }
+    });
+    
+    // Clear first item
+    if (firstItem) {
+        firstItem.querySelectorAll('input').forEach(input => input.value = '');
+        updateInvoiceTotal();
     }
+}
 
-    /**
-     * Calculate item amount
-     */
-    calculateItemAmount(input) {
-        const row = input.closest('tr');
-        if (!row) return;
-
-        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
-        const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
-        const amountInput = row.querySelector('.item-amount');
-        
-        const amount = quantity * rate;
-        amountInput.value = amount.toFixed(2);
+// Invoice Form Functions
+function initInvoiceForm() {
+    const form = document.getElementById('invoiceForm');
+    const addItemBtn = document.getElementById('addItemBtn');
+    
+    if (form) {
+        form.addEventListener('submit', handleInvoiceSubmit);
     }
+    
+    if (addItemBtn) {
+        addItemBtn.addEventListener('click', addInvoiceItem);
+    }
+    
+    // Initialize first item row
+    initItemRow(document.querySelector('.item-row'));
+}
 
-    /**
-     * Update invoice totals
-     */
-    updateInvoiceTotals() {
-        const type = this.state.currentTab;
-        const tbody = document.getElementById(`${type}-items-tbody`);
-        
-        if (!tbody) return;
-
-        let subtotal = 0;
-        const rows = tbody.querySelectorAll('tr');
-        
-        rows.forEach(row => {
-            const amount = parseFloat(row.querySelector('.item-amount').value) || 0;
-            subtotal += amount;
+function initItemRow(itemRow) {
+    if (!itemRow) return;
+    
+    const quantityInput = itemRow.querySelector('.quantity-input');
+    const rateInput = itemRow.querySelector('.rate-input');
+    const removeBtn = itemRow.querySelector('.remove-item');
+    
+    if (quantityInput) quantityInput.addEventListener('input', updateInvoiceTotal);
+    if (rateInput) rateInput.addEventListener('input', updateInvoiceTotal);
+    if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+            removeInvoiceItem(itemRow);
         });
-
-        const gstRate = 0.18;
-        const gst = subtotal * gstRate;
-        const total = subtotal + gst;
-
-        // Update display
-        this.updateTotalDisplay(`${type}-subtotal`, subtotal);
-        this.updateTotalDisplay(`${type}-tax`, gst);
-        this.updateTotalDisplay(`${type}-total`, total);
     }
+}
 
-    /**
-     * Update total display
-     */
-    updateTotalDisplay(elementId, amount) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.textContent = this.formatCurrency(amount);
-        }
+function addInvoiceItem() {
+    const itemsContainer = document.querySelector('.invoice-items');
+    const newItemRow = document.createElement('div');
+    newItemRow.className = 'item-row';
+    newItemRow.innerHTML = `
+        <input type="text" placeholder="Item description" class="form-input" required>
+        <input type="number" placeholder="Qty" class="form-input quantity-input" min="1" required>
+        <input type="number" placeholder="Rate" class="form-input rate-input" min="0" step="0.01" required>
+        <span class="item-total">₹0</span>
+        <button type="button" class="remove-item">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    
+    itemsContainer.appendChild(newItemRow);
+    initItemRow(newItemRow);
+}
+
+function removeInvoiceItem(itemRow) {
+    const itemsContainer = document.querySelector('.invoice-items');
+    const allItems = itemsContainer.querySelectorAll('.item-row');
+    
+    if (allItems.length > 1) {
+        itemRow.remove();
+        updateInvoiceTotal();
+    } else {
+        showToast('At least one item is required', 'error');
     }
+}
 
-    /**
-     * Remove invoice item
-     */
-    removeInvoiceItem(button) {
-        const row = button.closest('tr');
-        const tbody = row.closest('tbody');
+function updateInvoiceTotal() {
+    const itemRows = document.querySelectorAll('.item-row');
+    let subtotal = 0;
+    
+    itemRows.forEach(row => {
+        const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+        const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+        const itemTotal = quantity * rate;
         
-        row.remove();
-        this.updateInvoiceTotals();
+        row.querySelector('.item-total').textContent = formatCurrency(itemTotal);
+        subtotal += itemTotal;
+    });
+    
+    const tax = subtotal * 0.18; // 18% GST
+    const total = subtotal + tax;
+    
+    document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+    document.getElementById('tax').textContent = formatCurrency(tax);
+    document.getElementById('total').textContent = formatCurrency(total);
+}
 
-        // Ensure at least one item row exists
-        if (tbody.children.length === 0) {
-            this.addInvoiceItem({ target: { closest: () => null } });
-        }
-
-        // Hide free limitation if items reduced
-        if (!this.user.isPremium && tbody.children.length < 3) {
-            this.hideFreeLimitation();
-        }
-    }
-
-    /**
-     * Preview invoice
-     */
-    previewInvoice() {
-        const invoiceData = this.collectInvoiceData();
+function handleInvoiceSubmit(e) {
+    e.preventDefault();
+    
+    showLoading();
+    
+    // Simulate API call
+    setTimeout(() => {
+        const formData = new FormData(e.target);
+        const clientId = formData.get('client') || document.getElementById('invoiceClient').value;
+        const date = document.getElementById('invoiceDate').value;
         
-        if (!this.validateInvoiceData(invoiceData)) {
-            return;
-        }
-
-        this.generatePreview(invoiceData);
-        this.showModal('#invoice-preview-modal');
-    }
-
-    /**
-     * Save invoice
-     */
-    saveInvoice() {
-        const invoiceData = this.collectInvoiceData();
+        // Get client name
+        const client = clients.find(c => c.id === clientId);
         
-        if (!this.validateInvoiceData(invoiceData)) {
-            return;
-        }
-
-        // Add metadata
-        invoiceData.id = this.generateInvoiceId();
-        invoiceData.createdAt = new Date().toISOString();
-        invoiceData.status = 'saved';
-        invoiceData.theme = this.user.preferences.theme;
-
-        // Save to storage
-        this.state.invoices.push(invoiceData);
-        this.saveToStorage('invoices', this.state.invoices);
-
-        this.showNotification('Invoice saved successfully!', 'success');
-        this.resetInvoiceForm();
-    }
-
-    /**
-     * Print invoice
-     */
-    printInvoice() {
-        window.print();
-    }
-
-    /**
-     * Collect invoice data from form
-     */
-    collectInvoiceData() {
-        const type = this.state.currentTab;
+        // Get items data
+        const itemRows = document.querySelectorAll('.item-row');
+        const items = Array.from(itemRows).map(row => ({
+            description: row.querySelector('input[type="text"]').value,
+            quantity: parseFloat(row.querySelector('.quantity-input').value),
+            rate: parseFloat(row.querySelector('.rate-input').value)
+        }));
         
-        const data = {
-            type: type,
-            invoiceNumber: this.getValue(`${type}-invoice-number`),
-            date: this.getValue(`${type}-date`),
-            customer: this.getValue(`${type}-customer`),
-            mobile: this.getValue(`${type}-mobile`),
-            email: this.getValue(`${type}-email`),
-            items: [],
-            totals: {}
+        // Calculate total
+        const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+        const total = subtotal * 1.18; // Including 18% tax
+        
+        // Create new invoice
+        const newInvoice = {
+            id: generateInvoiceId(),
+            client: client ? client.name : 'Unknown Client',
+            clientId: clientId,
+            date: date,
+            amount: total,
+            status: 'pending',
+            items: items
         };
-
-        // Collect items
-        const tbody = document.getElementById(`${type}-items-tbody`);
-        const rows = tbody.querySelectorAll('tr');
         
-        rows.forEach(row => {
-            const product = row.querySelector('.item-product').value.trim();
-            const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
-            const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
-
-            if (product && quantity > 0 && rate >= 0) {
-                data.items.push({
-                    product,
-                    quantity,
-                    rate,
-                    amount: quantity * rate
-                });
-            }
-        });
-
-        // Calculate totals
-        const subtotal = data.items.reduce((sum, item) => sum + item.amount, 0);
-        const gst = subtotal * 0.18;
-        const total = subtotal + gst;
-
-        data.totals = { subtotal, gst, total };
-
-        return data;
-    }
-
-    /**
-     * Validate invoice data
-     */
-    validateInvoiceData(data) {
-        if (!data.customer.trim()) {
-            this.showNotification('Please enter customer name', 'error');
-            return false;
-        }
-
-        if (!data.date) {
-            this.showNotification('Please select invoice date', 'error');
-            return false;
-        }
-
-        if (data.items.length === 0) {
-            this.showNotification('Please add at least one item', 'error');
-            return false;
-        }
-
-        if (data.totals.total <= 0) {
-            this.showNotification('Invoice total must be greater than zero', 'error');
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Generate preview
-     */
-    generatePreview(data) {
-        const theme = this.themes[this.user.preferences.theme];
-        const previewContent = document.getElementById('invoice-preview-content');
+        invoices.unshift(newInvoice);
         
-        if (!previewContent) return;
+        hideLoading();
+        closeInvoiceModal();
+        showToast(`Invoice ${newInvoice.id} created successfully!`);
+        
+        // Update displays
+        updateDashboardStats();
+        renderRecentInvoices();
+        renderInvoicesTable();
+        
+    }, 1500);
+}
 
-        previewContent.innerHTML = this.createInvoiceHTML(data, theme);
-    }
-
-    /**
-     * Create invoice HTML
-     */
-    createInvoiceHTML(data, theme) {
+// Product/Inventory Functions
+function renderProductGrid() {
+    const productGrid = document.getElementById('productGrid');
+    if (!productGrid) return;
+    
+    productGrid.innerHTML = products.map(product => {
+        const stockStatus = product.stock === 0 ? 'out-of-stock' : 
+                           product.stock <= 5 ? 'low-stock' : 'in-stock';
+        const stockColor = product.stock === 0 ? 'var(--error-color)' : 
+                          product.stock <= 5 ? 'var(--warning-color)' : 'var(--success-color)';
+        
         return `
-            <div class="invoice-document">
-                <header class="invoice-header">
-                    <div class="company-section">
-                        <img src="${theme.logo}" alt="${theme.name}" class="company-logo">
-                        <div>
-                            <h1>${theme.name}</h1>
-                            <p class="invoice-type">INVOICE</p>
-                        </div>
+            <div class="product-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <h3 style="margin: 0; font-size: 16px; color: var(--body-color);">${product.name}</h3>
+                    <span style="background: ${stockColor}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 500;">
+                        ${product.stock} in stock
+                    </span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 8px;">${product.category}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 18px; font-weight: 600; color: var(--body-color);">${formatCurrency(product.price)}</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="action-btn" onclick="editProduct('${product.id}')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn" onclick="deleteProduct('${product.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
-                    <div class="invoice-details">
-                        <div><strong>Invoice #:</strong> ${data.invoiceNumber}</div>
-                        <div><strong>Date:</strong> ${this.formatDate(data.date)}</div>
-                        <div><strong>Generated:</strong> ${this.formatDate(new Date())}</div>
-                    </div>
-                </header>
-
-                <section class="customer-section">
-                    <h3>Bill To:</h3>
-                    <div class="customer-info">
-                        <div class="customer-name">${data.customer}</div>
-                        ${data.mobile ? `<div>Mobile: ${data.mobile}</div>` : ''}
-                        ${data.email ? `<div>Email: ${data.email}</div>` : ''}
-                    </div>
-                </section>
-
-                <section class="items-section">
-                    <table class="invoice-table">
-                        <thead>
-                            <tr>
-                                <th>Description</th>
-                                <th>Qty</th>
-                                <th>Rate</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.items.map(item => `
-                                <tr>
-                                    <td>${item.product}</td>
-                                    <td>${item.quantity}</td>
-                                    <td>${this.formatCurrency(item.rate)}</td>
-                                    <td>${this.formatCurrency(item.amount)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </section>
-
-                <section class="totals-section">
-                    <div class="totals-table">
-                        <div class="total-row">
-                            <span>Subtotal:</span>
-                            <span>${this.formatCurrency(data.totals.subtotal)}</span>
-                        </div>
-                        <div class="total-row">
-                            <span>GST (18%):</span>
-                            <span>${this.formatCurrency(data.totals.gst)}</span>
-                        </div>
-                        <div class="total-row final-total">
-                            <span>Total Amount:</span>
-                            <span>${this.formatCurrency(data.totals.total)}</span>
-                        </div>
-                    </div>
-                </section>
-
-                <footer class="invoice-footer">
-                    <p>Generated by <strong>UniBills ${this.version}</strong></p>
-                    <p>Thank you for your business!</p>
-                </footer>
+                </div>
             </div>
         `;
+    }).join('');
+}
+
+// Client Functions
+function renderClientGrid() {
+    const clientGrid = document.getElementById('clientGrid');
+    if (!clientGrid) return;
+    
+    clientGrid.innerHTML = clients.map(client => `
+        <div class="client-card">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 18px;">
+                    ${client.name.charAt(0)}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 16px; color: var(--body-color);">${client.name}</h3>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">${client.email}</p>
+                </div>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <p style="margin: 4px 0; color: var(--text-secondary); font-size: 14px;">
+                    <i class="fas fa-phone" style="width: 16px; margin-right: 8px;"></i>
+                    ${client.phone}
+                </p>
+                <p style="margin: 4px 0; color: var(--text-secondary); font-size: 14px;">
+                    <i class="fas fa-map-marker-alt" style="width: 16px; margin-right: 8px;"></i>
+                    ${client.address}
+                </p>
+            </div>
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button class="action-btn" onclick="editClient('${client.id}')" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn" onclick="createInvoiceForClient('${client.id}')" title="Create Invoice">
+                    <i class="fas fa-file-invoice"></i>
+                </button>
+                <button class="action-btn" onclick="deleteClient('${client.id}')" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Action Functions
+function shareOnWhatsApp(invoiceId) {
+    const invoice = invoices.find(inv => inv.id === invoiceId);
+    if (!invoice) {
+        showToast('Invoice not found', 'error');
+        return;
     }
+    
+    const client = clients.find(c => c.id === invoice.clientId);
+    const clientPhone = client ? client.phone.replace(/\D/g, '') : '';
+    
+    const message = `Hi ${invoice.client},%0A%0AYour invoice ${invoice.id} for ${formatCurrency(invoice.amount)} is ready.%0A%0ATotal Amount: ${formatCurrency(invoice.amount)}%0AStatus: ${invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}%0A%0AThank you for your business!`;
+    
+    const whatsappUrl = `https://wa.me/${clientPhone}?text=${message}`;
+    
+    showLoading();
+    setTimeout(() => {
+        hideLoading();
+        window.open(whatsappUrl, '_blank');
+        showToast('Opening WhatsApp...');
+    }, 1000);
+}
 
-    /**
-     * Show upgrade prompt for premium features
-     */
-    showUpgradePrompt(feature) {
-        const featureNames = {
-            professional: 'Professional Invoices',
-            realestate: 'Real Estate Cost Sheets',
-            more: 'Additional Invoice Types'
-        };
-
-        this.showNotification(
-            `${featureNames[feature]} require Premium access. Please upgrade to continue.`,
-            'error'
-        );
+function downloadInvoice(invoiceId) {
+    const invoice = invoices.find(inv => inv.id === invoiceId);
+    if (!invoice) {
+        showToast('Invoice not found', 'error');
+        return;
     }
+    
+    showLoading();
+    
+    // Simulate PDF generation
+    setTimeout(() => {
+        hideLoading();
+        
+        // In a real app, you would generate and download an actual PDF
+        // For demo purposes, we'll just show a success message
+        showToast(`Invoice ${invoice.id} downloaded successfully!`);
+        
+        // You could also trigger a fake download like this:
+        // const element = document.createElement('a');
+        // element.setAttribute('href', 'data:text/plain;charset=utf-8,Invoice Data Here');
+        // element.setAttribute('download', `${invoice.id}.pdf`);
+        // element.style.display = 'none';
+        // document.body.appendChild(element);
+        // element.click();
+        // document.body.removeChild(element);
+        
+    }, 2000);
+}
 
-    /**
-     * Show free user limitations
-     */
-    showFreeLimitation() {
-        const limitation = document.getElementById('pos-free-limitation');
-        if (limitation) {
-            limitation.style.display = 'block';
+function editInvoice(invoiceId) {
+    showToast('Edit invoice feature coming soon!', 'warning');
+}
+
+function deleteInvoice(invoiceId) {
+    if (confirm('Are you sure you want to delete this invoice?')) {
+        const index = invoices.findIndex(inv => inv.id === invoiceId);
+        if (index > -1) {
+            invoices.splice(index, 1);
+            showToast('Invoice deleted successfully!');
+            updateDashboardStats();
+            renderRecentInvoices();
+            renderInvoicesTable();
         }
-        this.showNotification('Free users can add maximum 3 items per invoice', 'error');
     }
+}
 
-    /**
-     * Hide free user limitations
-     */
-    hideFreeLimitation() {
-        const limitation = document.getElementById('pos-free-limitation');
-        if (limitation) {
-            limitation.style.display = 'none';
+function editProduct(productId) {
+    showToast('Edit product feature coming soon!', 'warning');
+}
+
+function deleteProduct(productId) {
+    if (confirm('Are you sure you want to delete this product?')) {
+        const index = products.findIndex(prod => prod.id === productId);
+        if (index > -1) {
+            products.splice(index, 1);
+            showToast('Product deleted successfully!');
+            renderProductGrid();
+            updateDashboardStats();
         }
     }
+}
 
-    /**
-     * Handle upgrade requests
-     */
-    handleUpgrade(event) {
-        event.preventDefault();
-        const message = `I want to buy UniBills Premium. Name: ${this.user.name || 'User'}, Email: ${this.user.email || 'Not provided'}, Current Plan: Free, Request: UPGRADE TO PREMIUM`;
-        this.openWhatsApp(message);
-    }
+function editClient(clientId) {
+    showToast('Edit client feature coming soon!', 'warning');
+}
 
-    /**
-     * Handle support requests
-     */
-    handleSupport(event) {
-        event.preventDefault();
-        const message = `Hello! I need support for UniBills. Name: ${this.user.name || 'User'}, Email: ${this.user.email || 'Not provided'}, Plan: ${this.user.isPremium ? 'Premium' : 'Free'}, Issue: General Support`;
-        this.openWhatsApp(message);
-    }
-
-    /**
-     * Handle password change
-     */
-    handlePasswordChange(event) {
-        event.preventDefault();
-        const message = `I want to change my password. Name: ${this.user.name}, Email: ${this.user.email}, Plan: ${this.user.isPremium ? 'Premium' : 'Free'}, Request: PASSWORD CHANGE`;
-        this.openWhatsApp(message);
-    }
-
-    /**
-     * Open WhatsApp with message
-     */
-    openWhatsApp(message) {
-        const url = `https://wa.me/${this.supportNumber}?text=${encodeURIComponent(message)}`;
-        window.open(url, '_blank');
-    }
-
-    // =======================
-    // UTILITY FUNCTIONS
-    // =======================
-
-    /**
-     * Show celebration animation for premium users
-     */
-    showCelebration() {
-        const container = document.getElementById('celebration-container');
-        if (!container) return;
-
-        // Create confetti particles
-        for (let i = 0; i < 50; i++) {
-            setTimeout(() => {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.cssText = `
-                    position: absolute;
-                    width: 10px;
-                    height: 10px;
-                    background: ${['#667eea', '#764ba2', '#f093fb', '#f5576c'][i % 4]};
-                    left: ${Math.random() * 100}vw;
-                    animation: confetti-fall ${2 + Math.random() * 3}s linear forwards;
-                `;
-                container.appendChild(confetti);
-                
-                setTimeout(() => confetti.remove(), 5000);
-            }, i * 50);
+function deleteClient(clientId) {
+    if (confirm('Are you sure you want to delete this client?')) {
+        const index = clients.findIndex(client => client.id === clientId);
+        if (index > -1) {
+            clients.splice(index, 1);
+            showToast('Client deleted successfully!');
+            renderClientGrid();
         }
     }
+}
 
-    /**
-     * Show notification message
-     */
-    showNotification(message, type = 'success') {
-        const container = document.getElementById('message-container');
-        if (!container) return;
+function createInvoiceForClient(clientId) {
+    const clientSelect = document.getElementById('invoiceClient');
+    if (clientSelect) {
+        clientSelect.value = clientId;
+    }
+    openInvoiceModal();
+}
 
-        const notification = document.createElement('div');
-        notification.className = `message ${type}`;
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-            <span>${message}</span>
+// Quick Action Functions
+function initQuickActions() {
+    const quickInvoiceBtn = document.getElementById('quickInvoice');
+    const addClientBtn = document.getElementById('addClient');
+    const addProductBtn = document.getElementById('addProduct');
+    const viewReportsBtn = document.getElementById('viewReports');
+    const addClientMainBtn = document.getElementById('addClientBtn');
+    const addProductMainBtn = document.getElementById('addProductBtn');
+    
+    if (quickInvoiceBtn) quickInvoiceBtn.addEventListener('click', openInvoiceModal);
+    if (addClientBtn) addClientBtn.addEventListener('click', () => showToast('Add client feature coming soon!', 'warning'));
+    if (addProductBtn) addProductBtn.addEventListener('click', () => showToast('Add product feature coming soon!', 'warning'));
+    if (viewReportsBtn) viewReportsBtn.addEventListener('click', () => showToast('Reports feature coming soon!', 'warning'));
+    if (addClientMainBtn) addClientMainBtn.addEventListener('click', () => showToast('Add client feature coming soon!', 'warning'));
+    if (addProductMainBtn) addProductMainBtn.addEventListener('click', () => showToast('Add product feature coming soon!', 'warning'));
+}
+
+// Search Functions
+function initSearch() {
+    const productSearch = document.getElementById('productSearch');
+    const clientSearch = document.getElementById('clientSearch');
+    
+    if (productSearch) {
+        productSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredProducts = products.filter(product =>
+                product.name.toLowerCase().includes(searchTerm) ||
+                product.category.toLowerCase().includes(searchTerm)
+            );
+            renderFilteredProducts(filteredProducts);
+        });
+    }
+    
+    if (clientSearch) {
+        clientSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredClients = clients.filter(client =>
+                client.name.toLowerCase().includes(searchTerm) ||
+                client.email.toLowerCase().includes(searchTerm)
+            );
+            renderFilteredClients(filteredClients);
+        });
+    }
+}
+
+function renderFilteredProducts(filteredProducts) {
+    const productGrid = document.getElementById('productGrid');
+    if (!productGrid) return;
+    
+    if (filteredProducts.length === 0) {
+        productGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-secondary);">
+                <i class="fas fa-search" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>
+                No products found matching your search
+            </div>
         `;
-
-        container.appendChild(notification);
-
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 300);
-        }, 5000);
+        return;
     }
+    
+    // Use existing renderProductGrid logic with filtered data
+    const originalProducts = products;
+    products = filteredProducts;
+    renderProductGrid();
+    products = originalProducts;
+}
 
-    /**
-     * Update user interface elements
-     */
-    updateUserInterface() {
-        // Update user info in header
-        const userInfo = document.getElementById('user-info');
-        const userName = userInfo?.querySelector('.user-name');
-        const userType = userInfo?.querySelector('.user-type');
-
-        if (userName) userName.textContent = this.user.name;
-        if (userType) {
-            userType.textContent = this.user.isPremium ? 'Premium' : 'Free';
-            userType.className = `user-type ${this.user.isPremium ? 'premium' : 'free'}`;
-        }
-        
-        if (userInfo) userInfo.style.display = 'flex';
-
-        // Update settings page
-        this.updateSettingsDisplay();
-
-        // Show/hide premium features
-        this.togglePremiumFeatures();
+function renderFilteredClients(filteredClients) {
+    const clientGrid = document.getElementById('clientGrid');
+    if (!clientGrid) return;
+    
+    if (filteredClients.length === 0) {
+        clientGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-secondary);">
+                <i class="fas fa-search" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>
+                No clients found matching your search
+            </div>
+        `;
+        return;
     }
+    
+    // Use existing renderClientGrid logic with filtered data
+    const originalClients = clients;
+    clients = filteredClients;
+    renderClientGrid();
+    clients = originalClients;
+}
 
-    /**
-     * Update settings display
-     */
-    updateSettingsDisplay() {
-        const elements = {
-            'settings-user-name': this.user.name || '-',
-            'settings-user-email': this.user.email || '-',
-            'settings-user-type': this.user.isPremium ? 'Premium Account' : 'Free Account'
-        };
-
-        Object.entries(elements).forEach(([id, value]) => {
-            const element = document.getElementById(id);
-            if (element) element.textContent = value;
-        });
-
-        // Update last updated time
-        const lastUpdated = document.getElementById('last-updated');
-        if (lastUpdated) {
-            lastUpdated.textContent = this.formatDateTime(new Date());
-        }
-    }
-
-    /**
-     * Toggle premium features visibility
-     */
-    togglePremiumFeatures() {
-        const premiumInfo = document.getElementById('premium-info');
-        const freeInfo = document.getElementById('free-info');
-
-        if (this.user.isPremium) {
-            if (premiumInfo) premiumInfo.style.display = 'flex';
-            if (freeInfo) freeInfo.style.display = 'none';
-        } else {
-            if (premiumInfo) premiumInfo.style.display = 'none';
-            if (freeInfo) freeInfo.style.display = 'flex';
-
-            // Setup upgrade link
-            const upgradeBtn = document.getElementById('buy-premium-btn');
-            if (upgradeBtn) {
-                const message = `I want to buy UniBills Premium. Name: ${this.user.name}, Email: ${this.user.email}, Current Plan: Free`;
-                upgradeBtn.href = `https://wa.me/${this.supportNumber}?text=${encodeURIComponent(message)}`;
-            }
-        }
-    }
-
-    /**
-     * Initialize invoice form
-     */
-    initializeInvoiceForm() {
-        // Set today's date
-        const today = new Date().toISOString().split('T')[0];
-        const dateInputs = document.querySelectorAll('input[type="date"]');
-        dateInputs.forEach(input => input.value = today);
-
-        // Generate invoice number
-        this.generateInvoiceNumber();
-
-        // Add initial item row
-        this.addInvoiceItem({ target: { closest: () => null } });
-    }
-
-    /**
-     * Generate unique invoice number
-     */
-    generateInvoiceNumber() {
-        const type = this.state.currentTab.toUpperCase();
-        const counter = this.state.counters[type] || 1001;
-        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-        const number = `${type}-${date}-${String(counter).padStart(4, '0')}`;
-
-        const input = document.getElementById(`${this.state.currentTab}-invoice-number`);
-        if (input) input.value = number;
-
-        // Increment counter
-        this.state.counters[type] = counter + 1;
-        this.saveToStorage('counters', this.state.counters);
-    }
-
-    /**
-     * Generate unique invoice ID
-     */
-    generateInvoiceId() {
-        return `inv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    }
-
-    /**
-     * Reset invoice form
-     */
-    resetInvoiceForm() {
-        const type = this.state.currentTab;
-        
-        // Clear form fields
-        ['customer', 'mobile', 'email'].forEach(field => {
-            const input = document.getElementById(`${type}-${field}`);
-            if (input) input.value = '';
-        });
-
-        // Clear items table
-        const tbody = document.getElementById(`${type}-items-tbody`);
-        if (tbody) tbody.innerHTML = '';
-
-        // Reset form
-        this.initializeInvoiceForm();
-    }
-
-    /**
-     * Reset all forms
-     */
-    resetForms() {
-        const forms = document.querySelectorAll('form');
-        forms.forEach(form => form.reset());
-    }
-
-    /**
-     * UI State Management
-     */
-    setLoginLoading(loading) {
-        const button = document.querySelector('.login-btn');
-        const btnText = button?.querySelector('.btn-text');
-        const btnLoader = button?.querySelector('.btn-loader');
-
-        if (loading) {
-            if (btnText) btnText.style.display = 'none';
-            if (btnLoader) btnLoader.style.display = 'block';
-            if (button) button.disabled = true;
-        } else {
-            if (btnText) btnText.style.display = 'block';
-            if (btnLoader) btnLoader.style.display = 'none';
-            if (button) button.disabled = false;
-        }
-    }
-
-    showLoginModal() {
-        const modal = document.getElementById('login-modal');
-        if (modal) modal.classList.add('show');
-    }
-
-    hideLoginModal() {
-        const modal = document.getElementById('login-modal');
-        if (modal) modal.classList.remove('show');
-    }
-
-    showMainApp() {
-        const app = document.getElementById('app-container');
-        const logoutBtn = document.getElementById('logout-btn');
-        
-        if (app) app.style.display = 'block';
-        if (logoutBtn) logoutBtn.style.display = 'flex';
-    }
-
-    hideMainApp() {
-        const app = document.getElementById('app-container');
-        if (app) app.style.display = 'none';
-    }
-
-    showModal(selector) {
-        const modal = document.querySelector(selector);
-        if (modal) modal.classList.add('show');
-    }
-
-    closeModal(button) {
-        const modal = button.closest('.modal');
-        if (modal) modal.classList.remove('show');
-    }
-
-    /**
-     * Utility Functions
-     */
-    getFormData(formSelector) {
-        const form = document.querySelector(formSelector);
-        if (!form) return {};
-
-        const formData = new FormData(form);
-        const data = {};
-        
-        // Get all form inputs
-        const inputs = form.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            if (input.name || input.id) {
-                const key = input.name || input.id.replace(/^.*-/, '');
-                data[key] = input.value;
-            }
-        });
-
-        return data;
-    }
-
-    getValue(id) {
-        const element = document.getElementById(id);
-        return element ? element.value : '';
-    }
-
-    setValue(id, value) {
-        const element = document.getElementById(id);
-        if (element) element.value = value;
-    }
-
-    isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-
-    formatCurrency(amount) {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            minimumFractionDigits: 2
-        }).format(amount);
-    }
-
-    formatCurrencyInput(input) {
-        const value = parseFloat(input.value);
-        if (!isNaN(value)) {
-            input.value = value.toFixed(2);
-        }
-    }
-
-    formatDate(date) {
-        return new Date(date).toLocaleDateString('en-IN', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-        });
-    }
-
-    formatDateTime(date) {
-        return new Date(date).toLocaleString('en-IN', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-    }
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    /**
-     * Setup PWA functionality
-     */
-    setupPWA() {
-        // PWA install prompt handling
-        let deferredPrompt;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
+// Keyboard Shortcuts
+function initKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + N for new invoice
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
             e.preventDefault();
-            deferredPrompt = e;
-            
-            const installPrompt = document.getElementById('pwa-install-prompt');
-            if (installPrompt) installPrompt.style.display = 'flex';
-        });
-
-        // Install button
-        const installBtn = document.getElementById('pwa-install-btn');
-        if (installBtn) {
-            installBtn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    
-                    if (outcome === 'accepted') {
-                        this.showNotification('UniBills installed successfully!', 'success');
-                    }
-                    
-                    deferredPrompt = null;
-                    const installPrompt = document.getElementById('pwa-install-prompt');
-                    if (installPrompt) installPrompt.style.display = 'none';
-                }
-            });
+            openInvoiceModal();
         }
+        
+        // Escape to close modal
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('invoiceModal');
+            if (modal.classList.contains('active')) {
+                closeInvoiceModal();
+            }
+        }
+    });
+}
 
-        // Dismiss button
-        const dismissBtn = document.getElementById('pwa-dismiss-btn');
-        if (dismissBtn) {
-            dismissBtn.addEventListener('click', () => {
-                const installPrompt = document.getElementById('pwa-install-prompt');
-                if (installPrompt) installPrompt.style.display = 'none';
-            });
+// Local Storage Functions
+function saveToLocalStorage() {
+    localStorage.setItem('bills_invoices', JSON.stringify(invoices));
+    localStorage.setItem('bills_products', JSON.stringify(products));
+    localStorage.setItem('bills_clients', JSON.stringify(clients));
+}
+
+function loadFromLocalStorage() {
+    const savedInvoices = localStorage.getItem('bills_invoices');
+    const savedProducts = localStorage.getItem('bills_products');
+    const savedClients = localStorage.getItem('bills_clients');
+    
+    if (savedInvoices) {
+        try {
+            invoices = JSON.parse(savedInvoices);
+        } catch (e) {
+            console.error('Error loading invoices from localStorage:', e);
         }
     }
+    
+    if (savedProducts) {
+        try {
+            products = JSON.parse(savedProducts);
+        } catch (e) {
+            console.error('Error loading products from localStorage:', e);
+        }
+    }
+    
+    if (savedClients) {
+        try {
+            clients = JSON.parse(savedClients);
+        } catch (e) {
+            console.error('Error loading clients from localStorage:', e);
+        }
+    }
+}
+
+// Auto-save functionality
+function setupAutoSave() {
+    setInterval(() => {
+        saveToLocalStorage();
+    }, 30000); // Save every 30 seconds
+    
+    // Save before page unload
+    window.addEventListener('beforeunload', saveToLocalStorage);
 }
 
 // Initialize Application
-document.addEventListener('DOMContentLoaded', () => {
-    // Hide loading screen
+function initApp() {
+    // Load data from localStorage first
+    loadFromLocalStorage();
+    
+    // Initialize all components
+    initNavigation();
+    initModal();
+    initInvoiceSearch();
+    initQuickActions();
+    initSearch();
+    initKeyboardShortcuts();
+    
+    // Load initial dashboard data
+    updateDashboardStats();
+    renderRecentInvoices();
+    
+    // Setup auto-save
+    setupAutoSave();
+    
+    // Show welcome message
     setTimeout(() => {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 500);
-        }
-    }, 1500);
-
-    // Initialize UniBills
-    window.UniBills = new UniBillsCore();
-    console.log('UniBills v1.0 Elite initialized successfully by AL Software');
-});
-
-// Export for testing
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = UniBillsCore;
+        showToast('Welcome to Bills! Your invoice management system is ready.', 'success');
+    }, 1000);
+    
+    console.log('Bills application initialized successfully!');
 }
+
+// Start the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', initApp);
+
+// Export functions for potential use in other scripts
+window.BillsApp = {
+    invoices,
+    products,
+    clients,
+    formatCurrency,
+    formatDate,
+    showToast,
+    shareOnWhatsApp,
+    downloadInvoice
+};
