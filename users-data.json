@@ -21,7 +21,7 @@
         "name": "Anas Lila",
         "email": "anas.lila@example.com",
         "password": "admin123",
-        "isPremium": true,
+        "isPremium": false,
         "role": "admin",
         "joinDate": "21/Aug/2025",
         "lastLogin": "21/Aug/2025 4:14:00 PM IST",
