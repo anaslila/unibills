@@ -1,6 +1,6 @@
-/* UniBills v1.0.959X-Pro — script.js */
+/* UniBills v1.0.9842Q-Pro — script.js */
 
-/* ---------- In-memory Data ---------- */
+/* ----------- In-memory Data ----------- */
 let invoices = [
   {
     id: 'INV-001',
@@ -11,36 +11,12 @@ let invoices = [
     taxPct: 18, taxIncluded: false,
     paymentMode: 'UPI', amountPaid: 29500,
     amount: 29500, status: 'paid'
-  },
-  {
-    id: 'INV-002',
-    client: 'Tech Solutions', clientId: 'client-002', clientPhone: '+91 9876543211',
-    date: '2025-08-28',
-    items: [{ description: 'UI/UX Design', quantity: 1, rate: 18500, unit: 'service' }],
-    discountMode: 'PERCENT', discountPercent: 0, discountAmount: 0,
-    taxPct: 18, taxIncluded: false,
-    paymentMode: 'Bank Transfer', amountPaid: 0,
-    amount: 21830, status: 'pending'
-  },
-  {
-    id: 'INV-003',
-    client: 'Digital Agency', clientId: 'client-003', clientPhone: '+91 9876543212',
-    date: '2025-08-25',
-    items: [{ description: 'Mobile App Development', quantity: 1, rate: 32000, unit: 'service' }],
-    discountMode: 'PERCENT', discountPercent: 0, discountAmount: 0,
-    taxPct: 18, taxIncluded: false,
-    paymentMode: 'Cash', amountPaid: 0,
-    amount: 37760, status: 'overdue'
   }
 ];
-
 let products = [
   { id: 'PRD-001', name: 'Website Development Package', price: 25000, stock: 10, unit: 'service', category: 'Services' },
-  { id: 'PRD-002', name: 'Mobile App Development', price: 45000, stock: 5, unit: 'service', category: 'Services' },
-  { id: 'PRD-003', name: 'Logo Design', price: 5000, stock: 0, unit: 'pcs', category: 'Design' },
-  { id: 'PRD-004', name: 'SEO Optimization', price: 12000, stock: 3, unit: 'service', category: 'Marketing' }
+  { id: 'PRD-002', name: 'Mobile App Development', price: 45000, stock: 5, unit: 'service', category: 'Services' }
 ];
-
 let clients = [
   { id: 'client-001', name: 'Acme Corp', email: 'contact@acme.com', phone: '+91 9876543210', address: '123 Business Street, Mumbai' },
   { id: 'client-002', name: 'Tech Solutions', email: 'info@techsolutions.com', phone: '+91 9876543211', address: '456 Tech Park, Bangalore' },
@@ -48,8 +24,8 @@ let clients = [
 ];
 
 let businessSettings = {
-  developer: 'UniBills Team',
-  version: '1.0.959X-Pro',
+  developer: 'UniBills Team (AL Softwares)',
+  version: '1.0.9842Q-Pro',
   build: 'September, 2025',
   name: 'Your Business Name',
   email: 'business@example.com',
@@ -60,11 +36,11 @@ let businessSettings = {
   logo: null
 };
 
-let currentInvoiceId = null;
 let editingClientId = null;
 let editingProductId = null;
+let sharingInvoiceId = null;
 
-/* ---------- Utils ---------- */
+/* ----------- Utils ----------- */
 function formatCurrency(n){
   const v = isFinite(n)? n : 0;
   return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0}).format(Math.round(v));
@@ -78,10 +54,13 @@ function genId(prefix, list){
   return id;
 }
 function showToast(msg, type='success'){
+  if (type==='welcome' && window.__welcomed__) return; // ensure only one welcome toast
+  if (type==='welcome') window.__welcomed__ = true;
+
   const c = document.getElementById('toastContainer');
   const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  const icon = type==='success'?'fa-check-circle': type==='error'?'fa-exclamation-circle':'fa-info-circle';
+  t.className = `toast ${type==='welcome'?'success':type}`;
+  const icon = (type==='success'||type==='welcome')?'fa-check-circle': type==='error'?'fa-exclamation-circle':'fa-info-circle';
   t.innerHTML = `<i class="fas ${icon} toast-icon"></i><span class="toast-message">${msg}</span><button class="toast-close">&times;</button>`;
   c.appendChild(t);
   const close=()=> t.remove();
@@ -92,7 +71,7 @@ function showLoading(){ document.getElementById('loadingSpinner').classList.add(
 function hideLoading(){ document.getElementById('loadingSpinner').classList.remove('active'); }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
-/* ---------- Navigation + Routing between sections ---------- */
+/* ----------- Navigation & Routing ----------- */
 function initNavigation(){
   const links = document.querySelectorAll('.nav-link');
   const sections = document.querySelectorAll('.content-section');
@@ -107,11 +86,10 @@ function initNavigation(){
       loadSection(section);
     });
   });
-  // back buttons from details
-  document.getElementById('backToClients')?.addEventListener('click', ()=> goToSection('clients'));
-  document.getElementById('backToInventory')?.addEventListener('click', ()=> goToSection('inventory'));
+  document.getElementById('backToClients')?.addEventListener('click', ()=> goTo('clients'));
+  document.getElementById('backToInventory')?.addEventListener('click', ()=> goTo('inventory'));
 }
-function goToSection(section){
+function goTo(section){
   document.querySelectorAll('.nav-link').forEach(n=>{
     if (n.dataset.section===section) n.classList.add('active'); else n.classList.remove('active');
   });
@@ -120,7 +98,7 @@ function goToSection(section){
   loadSection(section);
 }
 function loadSection(section){
-  if (section==='dashboard'){ updateDashboardStats(); renderRecentInvoices(); }
+  if (section==='dashboard'){ refreshDashboard(); }
   if (section==='invoices'){ renderInvoicesTable(); }
   if (section==='inventory'){ renderProductGrid(); updateInventoryStats(); }
   if (section==='clients'){ renderClientGrid(); }
@@ -128,19 +106,20 @@ function loadSection(section){
   if (section==='settings'){ loadBusinessSettings(); }
 }
 
-/* ---------- Dashboard ---------- */
-function updateDashboardStats(){
+/* ----------- Dashboard ----------- */
+function refreshDashboard(){
   const totalRevenue = invoices.reduce((s,i)=> i.status==='paid'? s + (i.amount||0) : s, 0);
-  const pendingAmt = invoices.reduce((s,i)=> i.status!=='paid'? s + (i.amount||0) - (i.amountPaid||0) : s, 0);
+  const pendingAmt = invoices.reduce((s,i)=> s + Math.max(0,(i.amount||0)-(i.amountPaid||0)), 0);
   const invCount = invoices.length;
   const units = products.reduce((s,p)=> s + (Number(p.stock)||0), 0);
 
   setText('#statRevenue', formatCurrency(totalRevenue));
-  setText('#statPending', formatCurrency(Math.max(0,pendingAmt)));
+  setText('#statPending', formatCurrency(pendingAmt));
   setText('#statInvoices', invCount);
   setText('#statStock', units);
+  renderRecentInvoices();
 }
-function setText(sel, val){ const el = document.querySelector(sel); if (el) el.textContent = val; }
+function setText(sel, val){ const el=document.querySelector(sel); if (el) el.textContent=val; }
 function renderRecentInvoices(){
   const wrap = document.querySelector('.invoice-list');
   if (!wrap) return;
@@ -149,7 +128,7 @@ function renderRecentInvoices(){
     <div class="invoice-item">
       <div class="invoice-info">
         <h4 class="invoice-number">${inv.id}</h4>
-        <p class="invoice-client">${inv.client}</p>
+        <p class="invoice-client">${escapeHtml(inv.client)}</p>
       </div>
       <div class="invoice-amount">${formatCurrency(inv.amount)}</div>
       <div class="invoice-status status-${inv.status}">${inv.status.toUpperCase()}</div>
@@ -161,7 +140,7 @@ function renderRecentInvoices(){
   `).join('') : `<div style="padding:20px;color:var(--muted)">No invoices yet</div>`;
 }
 
-/* ---------- Invoices list ---------- */
+/* ----------- Invoices List ----------- */
 function renderInvoicesTable(){
   const tbody = document.getElementById('invoiceTableBody');
   if (!tbody) return;
@@ -174,7 +153,7 @@ function renderInvoicesTable(){
     return `
       <tr>
         <td><strong>${inv.id}</strong></td>
-        <td>${inv.client}</td>
+        <td>${escapeHtml(inv.client)}</td>
         <td>${formatDate(inv.date)}</td>
         <td><strong>${formatCurrency(inv.amount)}</strong></td>
         <td><span class="invoice-status status-${inv.status}">${inv.status.toUpperCase()}</span></td>
@@ -193,8 +172,6 @@ function renderInvoicesTable(){
     `;
   }).join('');
 }
-
-/* Search/Filter in Invoices */
 function initInvoiceSearch(){
   document.getElementById('invoiceSearch')?.addEventListener('input', filterInvoices);
   document.getElementById('invoiceFilter')?.addEventListener('change', filterInvoices);
@@ -213,7 +190,7 @@ function filterInvoices(){
     return `
       <tr>
         <td><strong>${inv.id}</strong></td>
-        <td>${inv.client}</td>
+        <td>${escapeHtml(inv.client)}</td>
         <td>${formatDate(inv.date)}</td>
         <td><strong>${formatCurrency(inv.amount)}</strong></td>
         <td><span class="invoice-status status-${inv.status}">${inv.status.toUpperCase()}</span></td>
@@ -233,15 +210,26 @@ function filterInvoices(){
   }).join('') : `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">No invoices found</td></tr>`;
 }
 
-/* ---------- Invoice Modal (Per-invoice Tax + Discount dual mode) ---------- */
+/* ----------- Create/Edit Invoice Modal ----------- */
 function initInvoiceModal(){
   const modal = document.getElementById('invoiceModal');
-  document.getElementById('createInvoiceBtn')?.addEventListener('click', ()=>openInvoiceModal());
-  document.getElementById('newInvoiceBtn')?.addEventListener('click', ()=>openInvoiceModal());
-  document.getElementById('quickInvoice')?.addEventListener('click', ()=>openInvoiceModal());
+  document.getElementById('createInvoiceBtn')?.addEventListener('click', ()=> openInvoiceModal());
+  document.getElementById('newInvoiceBtn')?.addEventListener('click', ()=> openInvoiceModal());
+  document.getElementById('quickInvoice')?.addEventListener('click', ()=> openInvoiceModal());
   document.getElementById('closeModal')?.addEventListener('click', closeInvoiceModal);
   document.getElementById('cancelModal')?.addEventListener('click', closeInvoiceModal);
   modal?.addEventListener('click', e=>{ if (e.target===modal) closeInvoiceModal(); });
+
+  // Paid button
+  document.getElementById('markPaidBtn')?.addEventListener('click', ()=>{
+    // read total as text and parse digits
+    const txt = document.getElementById('total').textContent || '0';
+    const num = Number(txt.replace(/[^\d.]/g,''));
+    document.getElementById('amountPaidInput').value = num || 0;
+    updateInvoiceTotal();
+  });
+
+  // Date shortcuts visibility also wired in inline <script> in HTML
   initInvoiceForm();
 }
 function openInvoiceModal(editId=null){
@@ -257,9 +245,10 @@ function closeInvoiceModal(){
 function resetInvoiceForm(){
   const form = document.getElementById('invoiceForm');
   form.reset();
+  // set today as default
   document.getElementById('invoiceDate').value = new Date().toISOString().split('T');
 
-  // keep one line
+  // keep one line item
   const wrap = document.querySelector('.invoice-items');
   wrap.querySelectorAll('.item-row').forEach((r,i)=>{ if (i>0) r.remove(); });
   const row = wrap.querySelector('.item-row');
@@ -269,23 +258,23 @@ function resetInvoiceForm(){
   row.querySelector('.rate-input').value = '';
   row.querySelector('.item-total').textContent = formatCurrency(0);
 
-  // client
-  const cn = document.getElementById('invoiceClient'); const cp = document.getElementById('clientPhoneInput');
+  const cn = document.getElementById('invoiceClient');
+  const cp = document.getElementById('clientPhoneInput');
   cn.value=''; cp.value=''; delete cn.dataset.clientId;
 
-  // invoice-specific tax + discount
+  // discount / tax defaults
   document.getElementById('discountMode').value='PERCENT';
-  document.getElementById('discountInputPercent').value = 0;
-  document.getElementById('discountInputAmount').value = 0;
-  document.getElementById('invoiceTaxPct').value = 18;
-  document.getElementById('invoiceTaxIncluded').checked = false;
+  document.getElementById('discountInputPercent').value=0;
+  document.getElementById('discountInputAmount').value=0;
+  document.getElementById('invoiceTaxPct').value=18;
+  document.getElementById('invoiceTaxIncluded').checked=false;
+  document.getElementById('paymentModeSelect').value='Cash';
+  document.getElementById('amountPaidInput').value=0;
 
-  // totals
   setText('#subtotal', formatCurrency(0));
   setText('#tax', formatCurrency(0));
   setText('#total', formatCurrency(0));
   setText('#remainingAmount', formatCurrency(0));
-  document.getElementById('amountPaidInput').value = 0;
 
   initClientDropdown();
   initItemDropdowns();
@@ -293,17 +282,16 @@ function resetInvoiceForm(){
 }
 function preloadInvoice(id){
   const inv = invoices.find(i=>i.id===id); if (!inv) return;
+  document.getElementById('invoiceDate').value = inv.date;
   const name = document.getElementById('invoiceClient');
   const phone = document.getElementById('clientPhoneInput');
   name.value = inv.client; name.dataset.clientId = inv.clientId || '';
   phone.value = inv.clientPhone || '';
-  document.getElementById('invoiceDate').value = inv.date;
 
-  // items
   const wrap = document.querySelector('.invoice-items');
   wrap.querySelectorAll('.item-row').forEach((r,i)=>{ if (i>0) r.remove(); });
   const first = wrap.querySelector('.item-row');
-  inv.items.forEach((it, idx)=>{
+  inv.items.forEach((it,idx)=>{
     let row = first;
     if (idx>0) row = addInvoiceItem(true);
     row.querySelector('.item-search').value = it.description;
@@ -312,13 +300,11 @@ function preloadInvoice(id){
     row.querySelector('.rate-input').value = it.rate;
   });
 
-  // discount & tax
   document.getElementById('discountMode').value = inv.discountMode || 'PERCENT';
   document.getElementById('discountInputPercent').value = inv.discountPercent || 0;
   document.getElementById('discountInputAmount').value = inv.discountAmount || 0;
   document.getElementById('invoiceTaxPct').value = typeof inv.taxPct==='number'? inv.taxPct : 18;
   document.getElementById('invoiceTaxIncluded').checked = !!inv.taxIncluded;
-
   document.getElementById('paymentModeSelect').value = inv.paymentMode || 'Cash';
   document.getElementById('amountPaidInput').value = inv.amountPaid || 0;
 
@@ -326,7 +312,7 @@ function preloadInvoice(id){
   updateInvoiceTotal();
 }
 function initInvoiceForm(){
-  document.getElementById('addItemBtn')?.addEventListener('click', ()=>addInvoiceItem());
+  document.getElementById('addItemBtn')?.addEventListener('click', ()=> addInvoiceItem());
   document.getElementById('invoiceForm')?.addEventListener('submit', handleInvoiceSubmit);
 }
 function addInvoiceItem(returnRow=false){
@@ -347,10 +333,8 @@ function addInvoiceItem(returnRow=false){
     </div>
   `;
   container.appendChild(shell);
-  const qty = shell.querySelector('.quantity-input');
-  const rate = shell.querySelector('.rate-input');
-  qty.addEventListener('input', updateInvoiceTotal);
-  rate.addEventListener('input', updateInvoiceTotal);
+  shell.querySelector('.quantity-input').addEventListener('input', updateInvoiceTotal);
+  shell.querySelector('.rate-input').addEventListener('input', updateInvoiceTotal);
   shell.querySelector('.remove-item').addEventListener('click', ()=>{ shell.remove(); updateInvoiceTotal(); });
   initSingleItemDropdown(shell.querySelector('.item-search'));
   if (returnRow) return shell;
@@ -360,7 +344,7 @@ function wireSummaryInputs(){
   ids.forEach(id=>{
     const el = document.getElementById(id);
     if (!el) return;
-    const evt = id==='invoiceTaxIncluded'? 'change' : 'input';
+    const evt = id==='invoiceTaxIncluded'? 'change':'input';
     el.addEventListener(evt, ()=>{
       if (id==='discountInputPercent') syncDiscountFromPercent();
       if (id==='discountInputAmount') syncDiscountFromAmount();
@@ -368,30 +352,9 @@ function wireSummaryInputs(){
       updateInvoiceTotal();
     }, { passive:true });
   });
+  enforceDiscountMode(); // set initial disabled state
 }
-function syncDiscountFromPercent(){
-  const percent = parseFloat(document.getElementById('discountInputPercent').value)||0;
-  const { base } = computeBaseAndTaxPreview(); // base before tax
-  const amt = Math.max(0, base * (percent/100));
-  document.getElementById('discountInputAmount').value = round2(amt);
-}
-function syncDiscountFromAmount(){
-  const amount = parseFloat(document.getElementById('discountInputAmount').value)||0;
-  const { base } = computeBaseAndTaxPreview();
-  const pct = base>0 ? (amount/base)*100 : 0;
-  document.getElementById('discountInputPercent').value = round2(pct);
-}
-function enforceDiscountMode(){
-  const mode = document.getElementById('discountMode').value;
-  const p = document.getElementById('discountInputPercent');
-  const a = document.getElementById('discountInputAmount');
-  if (mode==='PERCENT'){ p.removeAttribute('disabled'); a.setAttribute('disabled','disabled'); }
-  else { a.removeAttribute('disabled'); p.setAttribute('disabled','disabled'); }
-}
-function round2(n){ return Math.round((n + Number.EPSILON)*100)/100; }
-
-function computeBaseAndTaxPreview(){
-  // subtotal from lines
+function computeBaseTax(){
   let subtotal = 0;
   document.querySelectorAll('.item-row').forEach(r=>{
     const q = parseFloat(r.querySelector('.quantity-input').value)||0;
@@ -403,7 +366,7 @@ function computeBaseAndTaxPreview(){
   let base = subtotal, tax = 0;
   if (included){
     const f = 1 + (taxPct/100);
-    const net = f? (subtotal / f) : subtotal; // extract base from inclusive [9]
+    const net = f? subtotal / f : subtotal; // yesterday/today logic elsewhere [8][2][1]
     tax = subtotal - net; base = net;
   } else {
     tax = base * (taxPct/100);
@@ -411,30 +374,23 @@ function computeBaseAndTaxPreview(){
   return { subtotal, base, tax, taxPct, included };
 }
 function updateInvoiceTotal(){
-  // update per-line totals
-  let subtotal = 0;
+  // per-line totals
   document.querySelectorAll('.item-row').forEach(r=>{
     const q = parseFloat(r.querySelector('.quantity-input').value)||0;
     const rate = parseFloat(r.querySelector('.rate-input').value)||0;
-    const t = q*rate;
-    r.querySelector('.item-total').textContent = formatCurrency(t);
-    subtotal += t;
+    r.querySelector('.item-total').textContent = formatCurrency(q*rate);
   });
 
-  const { base, tax, taxPct, included } = computeBaseAndTaxPreview();
-
-  // discount
+  const { base, tax, taxPct, included } = computeBaseTax();
   const mode = document.getElementById('discountMode').value;
   const discPct = parseFloat(document.getElementById('discountInputPercent').value)||0;
   const discAmt = parseFloat(document.getElementById('discountInputAmount').value)||0;
 
-  const discountAmount = mode==='PERCENT' ? (base * (discPct/100)) : discAmt;
+  const discountAmount = mode==='PERCENT'? (base*(discPct/100)) : discAmt;
   const baseAfterDiscount = Math.max(0, base - discountAmount);
 
-  // recompute tax only on base (if excluded), if included we keep extracted tax model simple
   let total = 0, taxDisplay = 0;
   if (included){
-    // Inclusive price: total = (baseAfterDiscount + tax proportionally kept). For simplicity, reduce base only; tax will be displayed as extracted from original subtotal.
     const proportion = base>0 ? (baseAfterDiscount/base) : 0;
     const adjustedTax = tax * proportion;
     total = baseAfterDiscount + adjustedTax;
@@ -452,61 +408,79 @@ function updateInvoiceTotal(){
   const paid = parseFloat(document.getElementById('amountPaidInput').value)||0;
   setText('#remainingAmount', formatCurrency(Math.max(0,total - paid)));
 }
+function enforceDiscountMode(){
+  const mode = document.getElementById('discountMode').value;
+  const p = document.getElementById('discountInputPercent');
+  const a = document.getElementById('discountInputAmount');
+  if (mode==='PERCENT'){ p.removeAttribute('disabled'); a.setAttribute('disabled','disabled'); }
+  else { a.removeAttribute('disabled'); p.setAttribute('disabled','disabled'); }
+}
+function syncDiscountFromPercent(){
+  const percent = parseFloat(document.getElementById('discountInputPercent').value)||0;
+  const { base } = computeBaseTax();
+  const amt = Math.max(0, base * (percent/100));
+  document.getElementById('discountInputAmount').value = round2(amt);
+}
+function syncDiscountFromAmount(){
+  const amount = parseFloat(document.getElementById('discountInputAmount').value)||0;
+  const { base } = computeBaseTax();
+  const pct = base>0 ? (amount/base)*100 : 0;
+  document.getElementById('discountInputPercent').value = round2(pct);
+}
+function round2(n){ return Math.round((n + Number.EPSILON)*100)/100; }
+
 function handleInvoiceSubmit(e){
   e.preventDefault();
   showLoading();
   setTimeout(()=>{
-    // client
+    // Client
     const nameEl = document.getElementById('invoiceClient');
     const phoneEl = document.getElementById('clientPhoneInput');
     let clientObj = null;
     if (nameEl.dataset.clientId){
       clientObj = clients.find(c=>c.id===nameEl.dataset.clientId);
-      if (clientObj && phoneEl.value) clientObj.phone = phoneEl.value.trim();
+      if (clientObj && phoneEl.value) clientObj.phone = phoneEl.value; // preserve capitalization of name (no lowercasing)
     } else {
       const newId = genId('client', clients);
-      clientObj = { id:newId, name: nameEl.value.trim(), phone: phoneEl.value.trim(), email:'', address:'' };
+      clientObj = { id:newId, name: nameEl.value, phone: phoneEl.value, email:'', address:'' }; // no toLowerCase
       clients.push(clientObj);
     }
-    // items
+
+    // Items
     const items = [];
     document.querySelectorAll('.item-row').forEach(r=>{
-      const desc = r.querySelector('.item-search').value.trim();
+      const desc = r.querySelector('.item-search').value;
       const q = parseFloat(r.querySelector('.quantity-input').value)||0;
-      const unit = (r.querySelector('.unit-input').value||'pcs').trim();
+      const unit = (r.querySelector('.unit-input').value||'pcs');
       const rate = parseFloat(r.querySelector('.rate-input').value)||0;
       if (!desc) return;
-      // add product if new
-      if (!products.find(p=>p.name.toLowerCase()===desc.toLowerCase())){
+      if (!products.find(p=>p.name===desc)){ // case-sensitive exact match to preserve capitalization
         products.push({ id: genId('PRD', products), name: desc, price: rate, stock: 0, unit, category: 'General' });
       }
       items.push({ description: desc, quantity: q, rate, unit });
     });
 
-    // totals
-    const { base } = computeBaseAndTaxPreview(); // from current inputs
+    // Totals
+    const { base } = computeBaseTax();
     const mode = document.getElementById('discountMode').value;
     const discPct = parseFloat(document.getElementById('discountInputPercent').value)||0;
     const discAmt = parseFloat(document.getElementById('discountInputAmount').value)||0;
     const taxPct = parseFloat(document.getElementById('invoiceTaxPct').value)||0;
     const included = document.getElementById('invoiceTaxIncluded').checked;
-    let discountAmount = mode==='PERCENT' ? (base*(discPct/100)) : discAmt;
+    const discountAmount = mode==='PERCENT'? (base*(discPct/100)) : discAmt;
     const baseAfterDiscount = Math.max(0, base - discountAmount);
-
     let total = 0;
     if (included){
-      // total is discounted base + proportional tax (same approach as preview)
-      const { tax } = computeBaseAndTaxPreview();
+      const { tax } = computeBaseTax();
       const proportion = base>0 ? (baseAfterDiscount/base) : 0;
       total = baseAfterDiscount + (tax*proportion);
     } else {
       total = baseAfterDiscount + (baseAfterDiscount*(taxPct/100));
     }
-
-    const paymentMode = document.getElementById('paymentModeSelect').value;
     const paid = parseFloat(document.getElementById('amountPaidInput').value)||0;
+    const paymentMode = document.getElementById('paymentModeSelect').value;
 
-    const newInv = {
+    const inv = {
       id: genId('INV', invoices),
       client: clientObj.name, clientId: clientObj.id, clientPhone: clientObj.phone||'',
       date: document.getElementById('invoiceDate').value,
@@ -519,17 +493,16 @@ function handleInvoiceSubmit(e){
       amount: total,
       status: paid >= total ? 'paid' : 'pending'
     };
-    invoices.unshift(newInv);
+    invoices.unshift(inv);
 
     hideLoading(); closeInvoiceModal();
-    showToast(`Invoice ${newInv.id} created successfully!`);
-    updateDashboardStats(); renderRecentInvoices(); renderInvoicesTable();
-    renderProductGrid(); renderClientGrid();
+    showToast(`Invoice ${inv.id} created successfully!`);
+    refreshDashboard(); renderInvoicesTable(); renderProductGrid(); renderClientGrid(); renderReports();
     saveAll();
   }, 300);
 }
 
-/* ---------- Searchable Dropdowns ---------- */
+/* ----------- Searchable Dropdowns ----------- */
 function initClientDropdown(){
   const input = document.getElementById('invoiceClient');
   const phone = document.getElementById('clientPhoneInput');
@@ -537,9 +510,10 @@ function initClientDropdown(){
   if (!input || !list) return;
 
   input.addEventListener('input', ()=>{
-    const term = input.value.toLowerCase().trim();
+    const term = input.value.trim();
     if (!term){ list.style.display='none'; return; }
-    const filtered = clients.filter(c=> c.name.toLowerCase().includes(term) || (c.phone||'').includes(term));
+    // filter case-insensitive, but show names with original caps
+    const filtered = clients.filter(c=> c.name.toLowerCase().includes(term.toLowerCase()) || (c.phone||'').includes(term));
     render(filtered, term);
     list.style.display='block';
   });
@@ -547,7 +521,7 @@ function initClientDropdown(){
   document.addEventListener('click', e=>{ if (!e.target.closest('#clientDropdown')) list.style.display='none'; });
 
   function render(arr, term){
-    const exact = arr.find(c=> c.name.toLowerCase()===term);
+    const exact = arr.find(c=> c.name===term);
     const rows = arr.map(c=>`
       <div class="dropdown-item" tabindex="0" onclick="selectClient('${c.id}')">
         <div class="dropdown-item-main">${escapeHtml(c.name)}</div>
@@ -566,7 +540,7 @@ function initClientDropdown(){
     input.dataset.clientId = c.id; input.value = c.name; phone.value = c.phone || '';
   };
   window.addNewClientFromTerm = (enc)=>{
-    const name = decodeURIComponent(enc);
+    const name = decodeURIComponent(enc); // preserve caps as typed
     delete input.dataset.clientId;
     input.value = name; phone.focus();
     showToast(`Enter a contact number for "${name}"`, 'info');
@@ -588,16 +562,16 @@ function initSingleItemDropdown(input){
   const unit = row.querySelector('.unit-input');
 
   input.addEventListener('input', ()=>{
-    const term = input.value.toLowerCase().trim();
+    const term = input.value.trim();
     if (!term){ dropdown.style.display='none'; return; }
-    const filtered = products.filter(p=> p.name.toLowerCase().includes(term));
+    const filtered = products.filter(p=> p.name.toLowerCase().includes(term.toLowerCase()));
     render(term, filtered);
     dropdown.style.display='block';
   });
   input.addEventListener('blur', ()=> setTimeout(()=> dropdown.style.display='none', 120));
 
   function render(term, list){
-    const exact = list.find(p=> p.name.toLowerCase()===term);
+    const exact = list.find(p=> p.name===term);
     const rows = list.map(p=>`
       <div class="dropdown-item" tabindex="0" onclick="selectProductLine('${p.id}', this)">
         <div class="dropdown-item-main">${escapeHtml(p.name)}</div>
@@ -618,7 +592,7 @@ function initSingleItemDropdown(input){
     updateInvoiceTotal();
   };
   window.addNewProductLine = (enc, el)=>{
-    const name = decodeURIComponent(enc);
+    const name = decodeURIComponent(enc); // preserve capitalization
     input.value = name; if (!qty.value) qty.value = 1;
     if (!unit.value) unit.value = 'pcs';
     showToast(`Enter unit and rate for "${name}"`, 'info');
@@ -626,8 +600,18 @@ function initSingleItemDropdown(input){
   };
 }
 
-/* ---------- WhatsApp Share ---------- */
-let sharingInvoiceId = null;
+/* ----------- Date Shortcuts (Today / Yesterday) ----------- */
+window.applyDateShortcut = function(which){
+  const dateInput = document.getElementById('invoiceDate');
+  const d = new Date();
+  if (which==='yesterday'){ d.setDate(d.getDate()-1); } // simple and robust [2][1]
+  const iso = d.toISOString().split('T'); // keep native date input format [8]
+  dateInput.value = iso;
+  const shortcuts = document.getElementById('dateShortcuts');
+  if (shortcuts) shortcuts.style.display = 'none';
+};
+
+/* ----------- WhatsApp Share & Download ----------- */
 function openWhatsappModal(id){ sharingInvoiceId=id; document.getElementById('whatsappModal').classList.add('active'); document.body.style.overflow='hidden'; }
 function closeWhatsappModal(){ sharingInvoiceId=null; document.getElementById('whatsappModal').classList.remove('active'); document.body.style.overflow='auto'; }
 function shareInvoiceFormat(fmt){
@@ -645,7 +629,7 @@ function shareText(inv){
   const subtotal = inv.items.reduce((s,it)=> s + (it.quantity*it.rate), 0);
   const remaining = Math.max(0,(inv.amount||0)-(inv.amountPaid||0));
   const msg = `*${businessSettings.name}*\n📧 ${businessSettings.email}\n📞 ${businessSettings.phone}\n🏢 ${businessSettings.address}\nGST: ${businessSettings.gst}\n\n*INVOICE ${inv.id}*\nDate: ${formatDate(inv.date)}\nClient: ${inv.client}\n\n*ITEMS:*\n${items}\n\nSubtotal: ${formatCurrency(subtotal)}\nTotal: ${formatCurrency(inv.amount)}\nPaid: ${formatCurrency(inv.amountPaid||0)}\nRemaining: ${formatCurrency(remaining)}\nStatus: ${inv.status.toUpperCase()}\n\nThank you for your business!`;
-  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`; // URL encode WhatsApp text [9]
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
   showToast('Opening WhatsApp…');
 }
@@ -739,48 +723,16 @@ function buildInvoiceImage(inv){
   return wrap;
 }
 
-/* ---------- Download Invoice ---------- */
-function downloadInvoice(id){
-  const inv = invoices.find(i=>i.id===id);
-  if (!inv) return showToast('Invoice not found','error');
-  showLoading();
-  const node = buildInvoiceImage(inv);
-  document.body.appendChild(node);
-  html2canvas(node,{backgroundColor:'#ffffff',scale:2,useCORS:true}).then(canvas=>{
-    canvas.toBlob(blob=>{
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download=`${inv.id}.png`; document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=> URL.revokeObjectURL(url), 5000);
-      hideLoading(); node.remove();
-      showToast(`Invoice ${inv.id} downloaded successfully!`);
-    }, 'image/png');
-  }).catch(err=>{
-    console.error(err); node.remove(); hideLoading();
-    // Fallback CSV
-    const rows = [
-      ['Invoice', inv.id], ['Date', formatDate(inv.date)], ['Client', inv.client], ['Phone', inv.clientPhone||''], [],
-      ['Description','Qty','Unit','Rate','Amount'],
-      ...inv.items.map(it=>[it.description,it.quantity,it.unit,it.rate,(it.quantity*it.rate)])
-    ];
-    const csv = rows.map(r=> r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download=`${inv.id}.csv`; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=> URL.revokeObjectURL(url), 5000);
-    showToast(`Invoice ${inv.id} downloaded as CSV`);
-  });
-}
-
-/* ---------- Edit/Delete Invoice ---------- */
+/* ----------- Edit/Delete Invoice ----------- */
 function editInvoice(id){ openInvoiceModal(id); }
 function deleteInvoice(id){
   if (!confirm('Delete this invoice?')) return;
   invoices = invoices.filter(i=>i.id!==id);
   showToast('Invoice deleted');
-  renderInvoicesTable(); renderRecentInvoices(); updateDashboardStats(); saveAll();
+  renderInvoicesTable(); refreshDashboard(); saveAll();
 }
 
-/* ---------- Inventory ---------- */
+/* ----------- Inventory ----------- */
 function renderProductGrid(){
   const grid = document.getElementById('productGrid');
   if (!grid) return;
@@ -796,7 +748,7 @@ function renderProductGrid(){
           <h3 style="margin:0;color:var(--text);font-weight:900;font-size:16px;">${escapeHtml(p.name)}</h3>
           <span style="background:${color};color:#fff;padding:2px 8px;border-radius:12px;font-size:10px">${p.stock} ${escapeHtml(p.unit)}</span>
         </div>
-        <div style="color:var(--muted);font-size:12px;margin-bottom:8px;">${escapeHtml(p.category)}</div>
+        <div style="color:var(--muted);font-size:12px;margin-bottom:8px;">${escapeHtml(p.category||'General')}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="font-weight:900;color:var(--text)">${formatCurrency(p.price)}/${escapeHtml(p.unit)}</div>
           <div style="display:flex;gap:8px;">
@@ -817,22 +769,33 @@ function updateInventoryStats(){
   setText('#outStock', out);
 }
 function openProductDetails(id){
-  const p = products.find(x=>x.id===id); if (!p) return;
-  editingProductId = id;
-  goToSection('inventory-details');
-  document.getElementById('pd_name').value = p.name;
-  document.getElementById('pd_category').value = p.category || '';
-  document.getElementById('pd_unit').value = p.unit || '';
-  document.getElementById('pd_price').value = p.price || 0;
-  document.getElementById('pd_stock').value = p.stock || 0;
+  editingProductId = id || null;
+  // fill if edit; else blank for create
+  if (id){
+    const p = products.find(x=>x.id===id); if (p){
+      document.getElementById('pd_name').value = p.name||'';
+      document.getElementById('pd_category').value = p.category||'';
+      document.getElementById('pd_unit').value = p.unit||'';
+      document.getElementById('pd_price').value = p.price||0;
+      document.getElementById('pd_stock').value = p.stock||0;
+    }
+  } else {
+    document.getElementById('pd_name').value = '';
+    document.getElementById('pd_category').value = '';
+    document.getElementById('pd_unit').value = '';
+    document.getElementById('pd_price').value = '';
+    document.getElementById('pd_stock').value = '';
+  }
+  goTo('inventory-details');
 }
 function deleteProduct(id){
   if (!confirm('Delete this product?')) return;
   products = products.filter(p=>p.id!==id);
-  showToast('Product deleted'); renderProductGrid(); updateInventoryStats(); saveAll();
+  showToast('Product deleted');
+  renderProductGrid(); updateInventoryStats(); saveAll();
 }
 
-/* Inventory search */
+/* Inventory search & IO */
 function initInventorySearch(){
   document.getElementById('productSearch')?.addEventListener('input', e=>{
     const term = e.target.value.toLowerCase();
@@ -840,11 +803,11 @@ function initInventorySearch(){
     const orig = products; products = filtered; renderProductGrid(); products = orig;
   });
 }
-
-/* Import/Export Inventory */
 function initInventoryIO(){
   document.getElementById('importInventoryFile')?.addEventListener('change', handleInventoryImport);
   document.getElementById('exportInventoryBtn')?.addEventListener('click', exportInventoryXLSX);
+  // Add Product (create mode)
+  document.getElementById('addProductBtn')?.addEventListener('click', ()=> openProductDetails(null));
 }
 function handleInventoryImport(e){
   const file = e.target.files; if (!file) return;
@@ -859,7 +822,7 @@ function handleInventoryImport(e){
       data.forEach(r=>{
         const name = r.Name || r.name || r.Product || r.product;
         if (!name) return;
-        if (products.find(p=>p.name.toLowerCase()===String(name).toLowerCase())) return;
+        if (products.find(p=>p.name===String(name))) return; // case-sensitive avoid duplicates
         products.push({
           id: genId('PRD', products),
           name: String(name),
@@ -887,7 +850,7 @@ function exportInventoryXLSX(){
   }catch(err){ console.error(err); showToast('Export failed','error'); }
 }
 
-/* ---------- Clients ---------- */
+/* ----------- Clients ----------- */
 function renderClientGrid(){
   const grid = document.getElementById('clientGrid');
   if (!grid) return;
@@ -915,18 +878,29 @@ function renderClientGrid(){
   `).join('');
 }
 function openClientDetails(id){
-  const c = clients.find(x=>x.id===id); if (!c) return;
-  editingClientId = id;
-  goToSection('client-details');
-  document.getElementById('cd_name').value = c.name || '';
-  document.getElementById('cd_phone').value = c.phone || '';
-  document.getElementById('cd_email').value = c.email || '';
-  document.getElementById('cd_address').value = c.address || '';
+  editingClientId = id || null;
+  if (id){
+    const c = clients.find(x=>x.id===id);
+    if (c){
+      document.getElementById('cd_name').value = c.name || '';
+      document.getElementById('cd_phone').value = c.phone || '';
+      document.getElementById('cd_email').value = c.email || '';
+      document.getElementById('cd_address').value = c.address || '';
+    }
+  } else {
+    // create mode
+    document.getElementById('cd_name').value = '';
+    document.getElementById('cd_phone').value = '';
+    document.getElementById('cd_email').value = '';
+    document.getElementById('cd_address').value = '';
+  }
+  goTo('client-details');
 }
 function deleteClient(id){
   if (!confirm('Delete this client?')) return;
   clients = clients.filter(c=>c.id!==id);
-  showToast('Client deleted'); renderClientGrid(); saveAll();
+  showToast('Client deleted');
+  renderClientGrid(); saveAll();
 }
 function createInvoiceForClient(id){
   const c = clients.find(x=>x.id===id);
@@ -937,7 +911,7 @@ function createInvoiceForClient(id){
   name.value = c.name; name.dataset.clientId = c.id; phone.value = c.phone||'';
 }
 
-/* Client search */
+/* Clients search & IO */
 function initClientSearch(){
   document.getElementById('clientSearch')?.addEventListener('input', e=>{
     const term = e.target.value.toLowerCase();
@@ -945,11 +919,11 @@ function initClientSearch(){
     const orig = clients; clients = filtered; renderClientGrid(); clients = orig;
   });
 }
-
-/* Import/Export Clients */
 function initClientsIO(){
   document.getElementById('importClientsFile')?.addEventListener('change', handleClientsImport);
   document.getElementById('exportClientsBtn')?.addEventListener('click', exportClientsXLSX);
+  // Add Client (create mode)
+  document.getElementById('addClientBtn')?.addEventListener('click', ()=> openClientDetails(null));
 }
 function handleClientsImport(e){
   const file = e.target.files; if (!file) return;
@@ -964,10 +938,10 @@ function handleClientsImport(e){
       data.forEach(r=>{
         const name = r.Name || r.name || r.Client || r.client;
         if (!name) return;
-        if (clients.find(c=>c.name.toLowerCase()===String(name).toLowerCase())) return;
+        if (clients.find(c=>c.name===String(name))) return; // case-sensitive duplicate block
         clients.push({
           id: genId('client', clients),
-          name: String(name),
+          name: String(name), // keep capitalization
           email: r.Email||r.email||'',
           phone: r.Phone||r.phone||r.Contact||r.contact||'',
           address: r.Address||r.address||''
@@ -991,34 +965,47 @@ function exportClientsXLSX(){
   }catch(err){ console.error(err); showToast('Export failed','error'); }
 }
 
-/* ---------- Client & Product Details Save ---------- */
+/* ----------- Detail Forms Save ----------- */
 function initDetailForms(){
   document.getElementById('clientDetailsForm')?.addEventListener('submit', e=>{
     e.preventDefault();
-    if (!editingClientId) return goToSection('clients');
-    const c = clients.find(x=>x.id===editingClientId); if (!c) return;
-    c.name = document.getElementById('cd_name').value.trim();
-    c.phone = document.getElementById('cd_phone').value.trim();
-    c.email = document.getElementById('cd_email').value.trim();
-    c.address = document.getElementById('cd_address').value.trim();
-    showToast('Client saved'); saveAll(); renderClientGrid(); goToSection('clients');
-    editingClientId = null;
+    const name = document.getElementById('cd_name').value; // keep exact caps
+    const phone = document.getElementById('cd_phone').value;
+    const email = document.getElementById('cd_email').value;
+    const address = document.getElementById('cd_address').value;
+    if (editingClientId){
+      const c = clients.find(x=>x.id===editingClientId); if (!c) return;
+      c.name = name; c.phone = phone; c.email = email; c.address = address;
+      showToast('Client updated');
+    } else {
+      const id = genId('client', clients);
+      clients.push({ id, name, phone, email, address });
+      showToast('Client added');
+    }
+    saveAll(); renderClientGrid(); goTo('clients'); editingClientId = null;
   });
+
   document.getElementById('productDetailsForm')?.addEventListener('submit', e=>{
     e.preventDefault();
-    if (!editingProductId) return goToSection('inventory');
-    const p = products.find(x=>x.id===editingProductId); if (!p) return;
-    p.name = document.getElementById('pd_name').value.trim();
-    p.category = document.getElementById('pd_category').value.trim();
-    p.unit = document.getElementById('pd_unit').value.trim() || 'pcs';
-    p.price = parseFloat(document.getElementById('pd_price').value)||0;
-    p.stock = parseInt(document.getElementById('pd_stock').value)||0;
-    showToast('Product saved'); saveAll(); renderProductGrid(); updateInventoryStats(); goToSection('inventory');
-    editingProductId = null;
+    const name = document.getElementById('pd_name').value;
+    const category = document.getElementById('pd_category').value;
+    const unit = document.getElementById('pd_unit').value || 'pcs';
+    const price = parseFloat(document.getElementById('pd_price').value)||0;
+    const stock = parseInt(document.getElementById('pd_stock').value)||0;
+    if (editingProductId){
+      const p = products.find(x=>x.id===editingProductId); if (!p) return;
+      p.name=name; p.category=category; p.unit=unit; p.price=price; p.stock=stock;
+      showToast('Product updated');
+    } else {
+      const id = genId('PRD', products);
+      products.push({ id, name, category, unit, price, stock });
+      showToast('Product added');
+    }
+    saveAll(); renderProductGrid(); updateInventoryStats(); goTo('inventory'); editingProductId = null;
   });
 }
 
-/* ---------- Reports (full page) ---------- */
+/* ----------- Reports ----------- */
 function renderReports(){
   const revenue = invoices.reduce((s,i)=> s + (i.amount||0), 0);
   const pending = invoices.reduce((s,i)=> s + Math.max(0,(i.amount||0)-(i.amountPaid||0)), 0);
@@ -1035,7 +1022,7 @@ function renderReports(){
   setText('#repOverdue', overdue);
 }
 
-/* ---------- Settings ---------- */
+/* ----------- Settings ----------- */
 function loadBusinessSettings(){
   document.getElementById('businessName').value = businessSettings.name;
   document.getElementById('businessEmail').value = businessSettings.email;
@@ -1049,12 +1036,12 @@ function loadBusinessSettings(){
 }
 function initSettings(){
   document.getElementById('saveBusinessSettingsBtn')?.addEventListener('click', ()=>{
-    businessSettings.name = document.getElementById('businessName').value.trim();
-    businessSettings.email = document.getElementById('businessEmail').value.trim();
-    businessSettings.phone = document.getElementById('businessPhone').value.trim();
-    businessSettings.gst = document.getElementById('businessGST').value.trim();
-    businessSettings.website = document.getElementById('businessWebsite').value.trim();
-    businessSettings.address = document.getElementById('businessAddress').value.trim();
+    businessSettings.name = document.getElementById('businessName').value;
+    businessSettings.email = document.getElementById('businessEmail').value;
+    businessSettings.phone = document.getElementById('businessPhone').value;
+    businessSettings.gst = document.getElementById('businessGST').value;
+    businessSettings.website = document.getElementById('businessWebsite').value;
+    businessSettings.address = document.getElementById('businessAddress').value;
     saveAll(); showToast('Settings saved');
   });
   document.getElementById('businessLogo')?.addEventListener('change', e=>{
@@ -1069,13 +1056,7 @@ function initSettings(){
   });
 }
 
-/* ---------- Quick Actions ---------- */
-function initQuickActions(){
-  document.getElementById('viewReports')?.addEventListener('click', ()=> goToSection('reports'));
-  // two disabled buttons left as-is per requirement
-}
-
-/* ---------- Storage ---------- */
+/* ----------- Exports/Imports helpers ----------- */
 function saveAll(){
   localStorage.setItem('ub_invoices', JSON.stringify(invoices));
   localStorage.setItem('ub_products', JSON.stringify(products));
@@ -1091,7 +1072,7 @@ function loadAll(){
   }catch(e){ console.warn('Storage parse error', e); }
 }
 
-/* ---------- Keyboard ---------- */
+/* ----------- Keyboard ----------- */
 function initHotkeys(){
   document.addEventListener('keydown', e=>{
     if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='n'){ e.preventDefault(); openInvoiceModal(); }
@@ -1099,35 +1080,33 @@ function initHotkeys(){
   });
 }
 
-/* ---------- Init ---------- */
+/* ----------- App Init ----------- */
 function initApp(){
   loadAll();
   initNavigation();
   initInvoiceModal();
   initInvoiceSearch();
   initInventorySearch();
-  initClientSearch();
-  initInventoryIO();
   initClientsIO();
-  initSettings();
+  initInventoryIO();
+  initClientSearch();
   initDetailForms();
-  initQuickActions();
+  initSettings();
   initHotkeys();
 
-  updateDashboardStats();
-  renderRecentInvoices();
+  refreshDashboard();
+  renderInvoicesTable();
   renderProductGrid();
   updateInventoryStats();
   renderClientGrid();
   renderReports();
 
-  // Welcome toast (correct version/build)
+  // Single welcome toast (guarded)
   setTimeout(()=>{
-    showToast(`Welcome to UniBills — Version ${businessSettings.version} (Build ${businessSettings.build})`, 'success');
+    showToast(`Welcome to UniBills — Version ${businessSettings.version} (Build ${businessSettings.build})`, 'welcome');
   }, 500);
 }
-
 document.addEventListener('DOMContentLoaded', initApp);
 
-/* expose minimal api */
-window.BillsApp = { openWhatsappModal, shareInvoiceFormat, downloadInvoice, openClientDetails, openProductDetails };
+/* expose */
+window.BillsApp = { openWhatsappModal, shareInvoiceFormat, applyDateShortcut, openClientDetails, openProductDetails };
