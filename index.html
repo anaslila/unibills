@@ -17,7 +17,7 @@
     <nav class="nav-container">
       <div class="logo-section">
         <img src="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/66ebc497-6808-43ba-9d7e-36e671267b46.png" alt="Bills Logo" class="logo-icon" />
-        <span class="logo-text">Bills</span>
+      <span class="logo-text">Bills</span>
       </div>
       <div class="nav-menu">
         <a href="#dashboard" class="nav-link active" data-section="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
@@ -111,7 +111,6 @@
       <div class="section-header">
         <h1 class="section-title"><i class="fas fa-file-invoice"></i> Invoices</h1>
         <div class="section-actions">
-          <!-- Premium Search -->
           <div class="search-box search-elevated" role="search">
             <i class="fas fa-search"></i>
             <input type="text" id="invoiceSearch" class="search-input" placeholder="Search invoices by #, client, amount..." aria-label="Search invoices" />
@@ -196,7 +195,7 @@
       </div>
     </section>
 
-    <!-- Reports (full page) -->
+    <!-- Reports -->
     <section id="reports-section" class="content-section">
       <div class="section-header">
         <h1 class="section-title"><i class="fas fa-chart-line"></i> Reports & Analytics</h1>
@@ -292,15 +291,15 @@
         <div class="settings-card">
           <h2><i class="fas fa-info-circle"></i> About</h2>
           <div class="about-info">
-            <p><strong>Developer:</strong> UniBills Team</p>
-            <p><strong>Version:</strong> 1.0.959X-Pro</p>
+            <p><strong>Developer:</strong> UniBills Team (AL Softwares)</p>
+            <p><strong>Version:</strong> 1.0.9842Q-Pro</p>
             <p><strong>Build:</strong> September, 2025</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Client Details (full page edit) -->
+    <!-- Client Details -->
     <section id="client-details-section" class="content-section">
       <div class="section-header">
         <h1 class="section-title"><i class="fas fa-user"></i> Client Details</h1>
@@ -335,7 +334,7 @@
       </div>
     </section>
 
-    <!-- Inventory Details (full page edit) -->
+    <!-- Inventory Details -->
     <section id="inventory-details-section" class="content-section">
       <div class="section-header">
         <h1 class="section-title"><i class="fas fa-box-open"></i> Inventory Details</h1>
@@ -373,10 +372,9 @@
         </form>
       </div>
     </section>
-
   </main>
 
-  <!-- Create Invoice Modal (with per-invoice Tax) -->
+  <!-- Create Invoice Modal -->
   <div class="modal" id="invoiceModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -397,10 +395,15 @@
             <div class="form-group">
               <label>Invoice Date</label>
               <input type="date" class="form-input" id="invoiceDate" required />
+              <!-- Date macros -->
+              <div class="dropdown-list" id="dateShortcuts" style="position:relative;display:none;margin-top:6px;">
+                <div class="dropdown-item" onclick="applyDateShortcut('today')">Today</div>
+                <div class="dropdown-item" onclick="applyDateShortcut('yesterday')">Yesterday</div>
+              </div>
             </div>
           </div>
 
-          <!-- Single-line items -->
+          <!-- Items single-line -->
           <div class="invoice-items">
             <h3>Items</h3>
             <div class="item-row">
@@ -419,7 +422,7 @@
           </div>
           <button type="button" class="btn btn-secondary" id="addItemBtn"><i class="fas fa-plus"></i>Add Item</button>
 
-          <!-- Per-invoice Tax + Discount -->
+          <!-- Discount + Tax (per invoice) -->
           <div class="invoice-summary">
             <div class="summary-row">
               <span>Subtotal:</span><span id="subtotal">₹0</span>
@@ -453,19 +456,23 @@
               <span>Total:</span><span id="total">₹0</span>
             </div>
 
-            <div class="summary-row">
+            <div class="summary-row" style="gap:12px;justify-content:flex-start">
               <label for="paymentModeSelect">Payment Mode</label>
-              <select id="paymentModeSelect" class="form-input" style="width:170px;margin-left:8px;">
+              <select id="paymentModeSelect" class="form-input" style="width:170px;">
                 <option value="Cash">Cash</option>
                 <option value="Credit Card">Credit Card</option>
                 <option value="Bank Transfer">Bank Transfer</option>
                 <option value="UPI">UPI</option>
                 <option value="Other">Other</option>
               </select>
+
+              <label>
+                Amount Paid
+                <input type="number" id="amountPaidInput" min="0" step="0.01" value="0" style="width:180px;margin-left:8px" />
+              </label>
+              <button type="button" class="btn btn-success" id="markPaidBtn" title="Autofill full payment"><i class="fas fa-check-circle"></i>Paid</button>
             </div>
-            <div class="summary-row">
-              <label>Amount Paid <input type="number" id="amountPaidInput" min="0" step="0.01" value="0" style="width:180px;margin-left:8px" /></label>
-            </div>
+
             <div class="summary-row">
               <span>Remaining Amount:</span><span id="remainingAmount">₹0</span>
             </div>
@@ -496,7 +503,7 @@
     </div>
   </div>
 
-  <!-- Hidden Invoice Template for Image Generation -->
+  <!-- Hidden Invoice Template -->
   <div id="invoiceTemplate" class="invoice-template" style="display:none;"></div>
 
   <!-- Loading / Toast -->
@@ -505,10 +512,12 @@
 
   <script src="script.js"></script>
   <script>
-    // Welcome toast with correct version/build
+    // Single welcome notification (ensure only once)
     document.addEventListener('DOMContentLoaded', function(){
+      if (window.__welcomed__) return; // guard against duplicates
+      window.__welcomed__ = true;
       setTimeout(function(){
-        const v = '1.0.959X-Pro';
+        const v = '1.0.9842Q-Pro';
         const b = 'September, 2025';
         const c = document.getElementById('toastContainer');
         const t = document.createElement('div');
@@ -517,8 +526,26 @@
         c.appendChild(t);
         t.querySelector('.toast-close').addEventListener('click', ()=> t.remove());
         setTimeout(()=> t.remove(), 5000);
-      }, 600);
+      }, 500);
     });
+
+    // Date shortcut dropdown behavior
+    document.addEventListener('DOMContentLoaded', function(){
+      const dateInput = document.getElementById('invoiceDate');
+      const shortcuts = document.getElementById('dateShortcuts');
+      if (!dateInput || !shortcuts) return;
+      dateInput.addEventListener('focus', ()=> shortcuts.style.display = 'block');
+      dateInput.addEventListener('blur', ()=> setTimeout(()=> shortcuts.style.display = 'none', 150));
+    });
+    function applyDateShortcut(which){
+      const dateInput = document.getElementById('invoiceDate');
+      const d = new Date();
+      if (which==='yesterday') d.setDate(d.getDate()-1);
+      const iso = d.toISOString().split('T');
+      dateInput.value = iso;
+      const shortcuts = document.getElementById('dateShortcuts');
+      if (shortcuts) shortcuts.style.display = 'none';
+    }
   </script>
 </body>
 </html>
