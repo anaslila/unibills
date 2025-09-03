@@ -98,6 +98,7 @@ body{
   border:1px solid var(--border);
   background:var(--panel); color:var(--text);
   font-weight:800; cursor:pointer; transition:var(--t);
+  white-space:nowrap;
 }
 .btn:hover{background:var(--panel-2);transform:translateY(-1px)}
 .btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
@@ -128,7 +129,7 @@ body{
   background:var(--panel);
   border:1px solid var(--border); border-radius:999px;
   padding:8px 14px 8px 40px; min-width:280px;
-  box-shadow:0 3px 10px rgba(60,64,67,.1); /* elevated look [4] */
+  box-shadow:0 3px 10px rgba(60,64,67,.1);
   transition:var(--t);
 }
 .search-box.search-elevated i{
@@ -293,21 +294,13 @@ body{
 .summary-row.tax-discount label{display:inline-flex;align-items:center;gap:6px;color:var(--text)}
 .summary-row.total{font-size:18px;font-weight:900;border-top:1px solid var(--border);padding-top:10px}
 
-/* Date Shortcuts (under date input) */
-#dateShortcuts{
-  position:relative;
-  display:none; /* toggled by JS */
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:var(--r8);
-  box-shadow:var(--shadow-2);
-  margin-top:6px;
-  overflow:hidden;
+/* Date shortcut buttons (inline with date input) */
+.form-group > div:has(#btnToday){
+  display:flex; gap:8px; margin-top:8px;
 }
-#dateShortcuts .dropdown-item{
-  border-bottom:1px solid var(--border);
+#btnToday, #btnYesterday{
+  border-radius:999px; padding:8px 14px; /* pill style shortcuts [8][10] */
 }
-#dateShortcuts .dropdown-item:last-child{border-bottom:none}
 
 /* Modals */
 .modal{
