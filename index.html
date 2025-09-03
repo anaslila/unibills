@@ -17,7 +17,7 @@
     <nav class="nav-container">
       <div class="logo-section">
         <img src="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/66ebc497-6808-43ba-9d7e-36e671267b46.png" alt="Bills Logo" class="logo-icon" />
-      <span class="logo-text">Bills</span>
+        <span class="logo-text">Bills</span>
       </div>
       <div class="nav-menu">
         <a href="#dashboard" class="nav-link active" data-section="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a>
@@ -289,10 +289,24 @@
         </div>
 
         <div class="settings-card">
+          <h2><i class="fas fa-list-check"></i> Features</h2>
+          <div class="about-info">
+            <p><strong>Invoices:</strong> Create, edit, share (WhatsApp text/image), PNG download, realtime totals, per-invoice tax (incl/excl), dual-mode discounts (%) and Rs</p>
+            <p><strong>Inventory:</strong> Add/edit (full page), import/export (XLSX), live search, stock stats (low/out)</p>
+            <p><strong>Clients:</strong> Add/edit (full page), import/export (XLSX), live search, capitalization preserved</p>
+            <p><strong>Dashboard:</strong> Revenue, invoice count, pending amount, stock units, recent invoices</p>
+            <p><strong>Reports:</strong> Revenue/pending totals, invoice count, status breakdown</p>
+            <p><strong>Design:</strong> Premium search bars, dark-mode safe, single-line item entry</p>
+            <p><strong>Share & Export:</strong> WhatsApp deep link, SheetJS XLSX export, html2canvas PNG invoice</p>
+            <p><strong>Shortcuts:</strong> Today/Yesterday date buttons, Paid autofill, Ctrl/Cmd+N new invoice</p>
+          </div>
+        </div>
+
+        <div class="settings-card">
           <h2><i class="fas fa-info-circle"></i> About</h2>
           <div class="about-info">
-            <p><strong>Developer:</strong> UniBills Team (AL Software)</p>
-            <p><strong>Version:</strong> 1.0.9842Q-Pro</p>
+            <p><strong>Developer:</strong> UniBills Team (AL Softwares)</p>
+            <p><strong>Version:</strong> 1.0.9905Z-Elite</p>
             <p><strong>Build:</strong> September, 2025</p>
           </div>
         </div>
@@ -395,10 +409,9 @@
             <div class="form-group">
               <label>Invoice Date</label>
               <input type="date" class="form-input" id="invoiceDate" required />
-              <!-- Date macros -->
-              <div class="dropdown-list" id="dateShortcuts" style="position:relative;display:none;margin-top:6px;">
-                <div class="dropdown-item" onclick="applyDateShortcut('today')">Today</div>
-                <div class="dropdown-item" onclick="applyDateShortcut('yesterday')">Yesterday</div>
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <button type="button" class="btn btn-secondary" id="btnToday"><i class="fas fa-calendar-day"></i> Today</button>
+                <button type="button" class="btn btn-secondary" id="btnYesterday"><i class="fas fa-calendar-minus"></i> Yesterday</button>
               </div>
             </div>
           </div>
@@ -512,12 +525,12 @@
 
   <script src="script.js"></script>
   <script>
-    // Single welcome notification (ensure only once)
+    // One-time welcome toast for the new version
     document.addEventListener('DOMContentLoaded', function(){
-      if (window.__welcomed__) return; // guard against duplicates
+      if (window.__welcomed__) return;
       window.__welcomed__ = true;
       setTimeout(function(){
-        const v = '1.0.9842Q-Pro';
+        const v = '1.0.9905Z-Elite';
         const b = 'September, 2025';
         const c = document.getElementById('toastContainer');
         const t = document.createElement('div');
@@ -529,23 +542,25 @@
       }, 500);
     });
 
-    // Date shortcut dropdown behavior
+    // Bind date shortcut buttons (explicit buttons instead of dropdown)
     document.addEventListener('DOMContentLoaded', function(){
       const dateInput = document.getElementById('invoiceDate');
-      const shortcuts = document.getElementById('dateShortcuts');
-      if (!dateInput || !shortcuts) return;
-      dateInput.addEventListener('focus', ()=> shortcuts.style.display = 'block');
-      dateInput.addEventListener('blur', ()=> setTimeout(()=> shortcuts.style.display = 'none', 150));
+      const btnToday = document.getElementById('btnToday');
+      const btnYesterday = document.getElementById('btnYesterday');
+      if (dateInput && btnToday){
+        btnToday.addEventListener('click', ()=>{
+          const d = new Date();
+          dateInput.value = d.toISOString().split('T');
+        });
+      }
+      if (dateInput && btnYesterday){
+        btnYesterday.addEventListener('click', ()=>{
+          const d = new Date();
+          d.setDate(d.getDate()-1);
+          dateInput.value = d.toISOString().split('T');
+        });
+      }
     });
-    function applyDateShortcut(which){
-      const dateInput = document.getElementById('invoiceDate');
-      const d = new Date();
-      if (which==='yesterday') d.setDate(d.getDate()-1);
-      const iso = d.toISOString().split('T');
-      dateInput.value = iso;
-      const shortcuts = document.getElementById('dateShortcuts');
-      if (shortcuts) shortcuts.style.display = 'none';
-    }
   </script>
 </body>
 </html>
