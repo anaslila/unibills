@@ -1,4 +1,4 @@
-/* UniBills v1.0.9842Q-Pro — script.js */
+/* UniBills v1.0.9905Z-Elite — script.js */
 
 /* ----------- In-memory Data ----------- */
 let invoices = [
@@ -25,7 +25,7 @@ let clients = [
 
 let businessSettings = {
   developer: 'UniBills Team (AL Softwares)',
-  version: '1.0.9842Q-Pro',
+  version: '1.0.9905Z-Elite',
   build: 'September, 2025',
   name: 'Your Business Name',
   email: 'business@example.com',
@@ -54,7 +54,7 @@ function genId(prefix, list){
   return id;
 }
 function showToast(msg, type='success'){
-  if (type==='welcome' && window.__welcomed__) return; // ensure only one welcome toast
+  if (type==='welcome' && window.__welcomed__) return; // ensure a single welcome toast
   if (type==='welcome') window.__welcomed__ = true;
 
   const c = document.getElementById('toastContainer');
@@ -220,16 +220,26 @@ function initInvoiceModal(){
   document.getElementById('cancelModal')?.addEventListener('click', closeInvoiceModal);
   modal?.addEventListener('click', e=>{ if (e.target===modal) closeInvoiceModal(); });
 
+  // Date buttons
+  document.getElementById('btnToday')?.addEventListener('click', ()=>{
+    const inp = document.getElementById('invoiceDate');
+    const d = new Date();
+    inp.value = d.toISOString().split('T'); // YYYY-MM-DD for date inputs [6]
+  });
+  document.getElementById('btnYesterday')?.addEventListener('click', ()=>{
+    const inp = document.getElementById('invoiceDate');
+    const d = new Date(); d.setDate(d.getDate()-1);
+    inp.value = d.toISOString().split('T'); // set reliably [6]
+  });
+
   // Paid button
   document.getElementById('markPaidBtn')?.addEventListener('click', ()=>{
-    // read total as text and parse digits
     const txt = document.getElementById('total').textContent || '0';
     const num = Number(txt.replace(/[^\d.]/g,''));
     document.getElementById('amountPaidInput').value = num || 0;
     updateInvoiceTotal();
   });
 
-  // Date shortcuts visibility also wired in inline <script> in HTML
   initInvoiceForm();
 }
 function openInvoiceModal(editId=null){
@@ -245,7 +255,6 @@ function closeInvoiceModal(){
 function resetInvoiceForm(){
   const form = document.getElementById('invoiceForm');
   form.reset();
-  // set today as default
   document.getElementById('invoiceDate').value = new Date().toISOString().split('T');
 
   // keep one line item
@@ -276,9 +285,11 @@ function resetInvoiceForm(){
   setText('#total', formatCurrency(0));
   setText('#remainingAmount', formatCurrency(0));
 
+  // Search dropdowns and listeners
   initClientDropdown();
   initItemDropdowns();
   wireSummaryInputs();
+  wireRowRealtimeInputs(row);
 }
 function preloadInvoice(id){
   const inv = invoices.find(i=>i.id===id); if (!inv) return;
@@ -298,6 +309,7 @@ function preloadInvoice(id){
     row.querySelector('.quantity-input').value = it.quantity;
     row.querySelector('.unit-input').value = it.unit || '';
     row.querySelector('.rate-input').value = it.rate;
+    wireRowRealtimeInputs(row);
   });
 
   document.getElementById('discountMode').value = inv.discountMode || 'PERCENT';
@@ -314,6 +326,19 @@ function preloadInvoice(id){
 function initInvoiceForm(){
   document.getElementById('addItemBtn')?.addEventListener('click', ()=> addInvoiceItem());
   document.getElementById('invoiceForm')?.addEventListener('submit', handleInvoiceSubmit);
+
+  // Delegate input changes for any dynamically added rows (fallback)
+  document.addEventListener('input', (e)=>{
+    if (e.target.matches('.quantity-input') || e.target.matches('.rate-input') || e.target.matches('#amountPaidInput') || e.target.matches('#invoiceTaxPct')){
+      updateInvoiceTotal(); // realtime calculations on input [4][11]
+    }
+  }, { passive:true });
+}
+function wireRowRealtimeInputs(row){
+  // Ensure immediate reaction to typing (not waiting for blur) [4]
+  row.querySelector('.quantity-input')?.addEventListener('input', updateInvoiceTotal, { passive:true });
+  row.querySelector('.rate-input')?.addEventListener('input', updateInvoiceTotal, { passive:true });
+  // If product name cleared and retyped, nothing special needed; calculations depend on qty*rate
 }
 function addInvoiceItem(returnRow=false){
   const container = document.querySelector('.invoice-items');
@@ -333,10 +358,9 @@ function addInvoiceItem(returnRow=false){
     </div>
   `;
   container.appendChild(shell);
-  shell.querySelector('.quantity-input').addEventListener('input', updateInvoiceTotal);
-  shell.querySelector('.rate-input').addEventListener('input', updateInvoiceTotal);
-  shell.querySelector('.remove-item').addEventListener('click', ()=>{ shell.remove(); updateInvoiceTotal(); });
   initSingleItemDropdown(shell.querySelector('.item-search'));
+  wireRowRealtimeInputs(shell);
+  shell.querySelector('.remove-item').addEventListener('click', ()=>{ shell.remove(); updateInvoiceTotal(); });
   if (returnRow) return shell;
 }
 function wireSummaryInputs(){
@@ -352,7 +376,7 @@ function wireSummaryInputs(){
       updateInvoiceTotal();
     }, { passive:true });
   });
-  enforceDiscountMode(); // set initial disabled state
+  enforceDiscountMode();
 }
 function computeBaseTax(){
   let subtotal = 0;
@@ -360,13 +384,14 @@ function computeBaseTax(){
     const q = parseFloat(r.querySelector('.quantity-input').value)||0;
     const rate = parseFloat(r.querySelector('.rate-input').value)||0;
     subtotal += q*rate;
+    r.querySelector('.item-total').textContent = formatCurrency(q*rate);
   });
   const taxPct = parseFloat(document.getElementById('invoiceTaxPct').value)||0;
   const included = document.getElementById('invoiceTaxIncluded').checked;
   let base = subtotal, tax = 0;
   if (included){
     const f = 1 + (taxPct/100);
-    const net = f? subtotal / f : subtotal; // yesterday/today logic elsewhere [8][2][1]
+    const net = f? subtotal / f : subtotal;
     tax = subtotal - net; base = net;
   } else {
     tax = base * (taxPct/100);
@@ -374,13 +399,6 @@ function computeBaseTax(){
   return { subtotal, base, tax, taxPct, included };
 }
 function updateInvoiceTotal(){
-  // per-line totals
-  document.querySelectorAll('.item-row').forEach(r=>{
-    const q = parseFloat(r.querySelector('.quantity-input').value)||0;
-    const rate = parseFloat(r.querySelector('.rate-input').value)||0;
-    r.querySelector('.item-total').textContent = formatCurrency(q*rate);
-  });
-
   const { base, tax, taxPct, included } = computeBaseTax();
   const mode = document.getElementById('discountMode').value;
   const discPct = parseFloat(document.getElementById('discountInputPercent').value)||0;
@@ -439,10 +457,10 @@ function handleInvoiceSubmit(e){
     let clientObj = null;
     if (nameEl.dataset.clientId){
       clientObj = clients.find(c=>c.id===nameEl.dataset.clientId);
-      if (clientObj && phoneEl.value) clientObj.phone = phoneEl.value; // preserve capitalization of name (no lowercasing)
+      if (clientObj && phoneEl.value) clientObj.phone = phoneEl.value;
     } else {
       const newId = genId('client', clients);
-      clientObj = { id:newId, name: nameEl.value, phone: phoneEl.value, email:'', address:'' }; // no toLowerCase
+      clientObj = { id:newId, name: nameEl.value, phone: phoneEl.value, email:'', address:'' }; // preserve caps
       clients.push(clientObj);
     }
 
@@ -454,7 +472,7 @@ function handleInvoiceSubmit(e){
       const unit = (r.querySelector('.unit-input').value||'pcs');
       const rate = parseFloat(r.querySelector('.rate-input').value)||0;
       if (!desc) return;
-      if (!products.find(p=>p.name===desc)){ // case-sensitive exact match to preserve capitalization
+      if (!products.find(p=>p.name===desc)){
         products.push({ id: genId('PRD', products), name: desc, price: rate, stock: 0, unit, category: 'General' });
       }
       items.push({ description: desc, quantity: q, rate, unit });
@@ -499,7 +517,7 @@ function handleInvoiceSubmit(e){
     showToast(`Invoice ${inv.id} created successfully!`);
     refreshDashboard(); renderInvoicesTable(); renderProductGrid(); renderClientGrid(); renderReports();
     saveAll();
-  }, 300);
+  }, 200);
 }
 
 /* ----------- Searchable Dropdowns ----------- */
@@ -512,7 +530,6 @@ function initClientDropdown(){
   input.addEventListener('input', ()=>{
     const term = input.value.trim();
     if (!term){ list.style.display='none'; return; }
-    // filter case-insensitive, but show names with original caps
     const filtered = clients.filter(c=> c.name.toLowerCase().includes(term.toLowerCase()) || (c.phone||'').includes(term));
     render(filtered, term);
     list.style.display='block';
@@ -540,7 +557,7 @@ function initClientDropdown(){
     input.dataset.clientId = c.id; input.value = c.name; phone.value = c.phone || '';
   };
   window.addNewClientFromTerm = (enc)=>{
-    const name = decodeURIComponent(enc); // preserve caps as typed
+    const name = decodeURIComponent(enc); // preserve capitalization
     delete input.dataset.clientId;
     input.value = name; phone.focus();
     showToast(`Enter a contact number for "${name}"`, 'info');
@@ -592,7 +609,7 @@ function initSingleItemDropdown(input){
     updateInvoiceTotal();
   };
   window.addNewProductLine = (enc, el)=>{
-    const name = decodeURIComponent(enc); // preserve capitalization
+    const name = decodeURIComponent(enc);
     input.value = name; if (!qty.value) qty.value = 1;
     if (!unit.value) unit.value = 'pcs';
     showToast(`Enter unit and rate for "${name}"`, 'info');
@@ -600,15 +617,12 @@ function initSingleItemDropdown(input){
   };
 }
 
-/* ----------- Date Shortcuts (Today / Yesterday) ----------- */
+/* ----------- Date Shortcuts exposed (not used now; we use buttons) ----------- */
 window.applyDateShortcut = function(which){
   const dateInput = document.getElementById('invoiceDate');
   const d = new Date();
-  if (which==='yesterday'){ d.setDate(d.getDate()-1); } // simple and robust [2][1]
-  const iso = d.toISOString().split('T'); // keep native date input format [8]
-  dateInput.value = iso;
-  const shortcuts = document.getElementById('dateShortcuts');
-  if (shortcuts) shortcuts.style.display = 'none';
+  if (which==='yesterday'){ d.setDate(d.getDate()-1); }
+  dateInput.value = d.toISOString().split('T');
 };
 
 /* ----------- WhatsApp Share & Download ----------- */
@@ -619,8 +633,8 @@ function shareInvoiceFormat(fmt){
   const inv = invoices.find(i=>i.id===sharingInvoiceId); if (!inv) return showToast('Invoice not found','error');
   closeWhatsappModal();
   showLoading();
-  if (fmt==='text'){ setTimeout(()=>{ shareText(inv); hideLoading(); }, 300); }
-  else { setTimeout(()=>{ shareImage(inv); hideLoading(); }, 700); }
+  if (fmt==='text'){ setTimeout(()=>{ shareText(inv); hideLoading(); }, 250); }
+  else { setTimeout(()=>{ shareImage(inv); hideLoading(); }, 600); }
 }
 function shareText(inv){
   const client = clients.find(c=>c.id===inv.clientId);
@@ -770,7 +784,6 @@ function updateInventoryStats(){
 }
 function openProductDetails(id){
   editingProductId = id || null;
-  // fill if edit; else blank for create
   if (id){
     const p = products.find(x=>x.id===id); if (p){
       document.getElementById('pd_name').value = p.name||'';
@@ -806,7 +819,6 @@ function initInventorySearch(){
 function initInventoryIO(){
   document.getElementById('importInventoryFile')?.addEventListener('change', handleInventoryImport);
   document.getElementById('exportInventoryBtn')?.addEventListener('click', exportInventoryXLSX);
-  // Add Product (create mode)
   document.getElementById('addProductBtn')?.addEventListener('click', ()=> openProductDetails(null));
 }
 function handleInventoryImport(e){
@@ -822,7 +834,7 @@ function handleInventoryImport(e){
       data.forEach(r=>{
         const name = r.Name || r.name || r.Product || r.product;
         if (!name) return;
-        if (products.find(p=>p.name===String(name))) return; // case-sensitive avoid duplicates
+        if (products.find(p=>p.name===String(name))) return;
         products.push({
           id: genId('PRD', products),
           name: String(name),
@@ -888,7 +900,6 @@ function openClientDetails(id){
       document.getElementById('cd_address').value = c.address || '';
     }
   } else {
-    // create mode
     document.getElementById('cd_name').value = '';
     document.getElementById('cd_phone').value = '';
     document.getElementById('cd_email').value = '';
@@ -922,7 +933,6 @@ function initClientSearch(){
 function initClientsIO(){
   document.getElementById('importClientsFile')?.addEventListener('change', handleClientsImport);
   document.getElementById('exportClientsBtn')?.addEventListener('click', exportClientsXLSX);
-  // Add Client (create mode)
   document.getElementById('addClientBtn')?.addEventListener('click', ()=> openClientDetails(null));
 }
 function handleClientsImport(e){
@@ -938,10 +948,10 @@ function handleClientsImport(e){
       data.forEach(r=>{
         const name = r.Name || r.name || r.Client || r.client;
         if (!name) return;
-        if (clients.find(c=>c.name===String(name))) return; // case-sensitive duplicate block
+        if (clients.find(c=>c.name===String(name))) return;
         clients.push({
           id: genId('client', clients),
-          name: String(name), // keep capitalization
+          name: String(name),
           email: r.Email||r.email||'',
           phone: r.Phone||r.phone||r.Contact||r.contact||'',
           address: r.Address||r.address||''
@@ -963,46 +973,6 @@ function exportClientsXLSX(){
     XLSX.writeFile(wb, 'clients-export.xlsx', { compression:true });
     showToast('Exported clients to clients-export.xlsx');
   }catch(err){ console.error(err); showToast('Export failed','error'); }
-}
-
-/* ----------- Detail Forms Save ----------- */
-function initDetailForms(){
-  document.getElementById('clientDetailsForm')?.addEventListener('submit', e=>{
-    e.preventDefault();
-    const name = document.getElementById('cd_name').value; // keep exact caps
-    const phone = document.getElementById('cd_phone').value;
-    const email = document.getElementById('cd_email').value;
-    const address = document.getElementById('cd_address').value;
-    if (editingClientId){
-      const c = clients.find(x=>x.id===editingClientId); if (!c) return;
-      c.name = name; c.phone = phone; c.email = email; c.address = address;
-      showToast('Client updated');
-    } else {
-      const id = genId('client', clients);
-      clients.push({ id, name, phone, email, address });
-      showToast('Client added');
-    }
-    saveAll(); renderClientGrid(); goTo('clients'); editingClientId = null;
-  });
-
-  document.getElementById('productDetailsForm')?.addEventListener('submit', e=>{
-    e.preventDefault();
-    const name = document.getElementById('pd_name').value;
-    const category = document.getElementById('pd_category').value;
-    const unit = document.getElementById('pd_unit').value || 'pcs';
-    const price = parseFloat(document.getElementById('pd_price').value)||0;
-    const stock = parseInt(document.getElementById('pd_stock').value)||0;
-    if (editingProductId){
-      const p = products.find(x=>x.id===editingProductId); if (!p) return;
-      p.name=name; p.category=category; p.unit=unit; p.price=price; p.stock=stock;
-      showToast('Product updated');
-    } else {
-      const id = genId('PRD', products);
-      products.push({ id, name, category, unit, price, stock });
-      showToast('Product added');
-    }
-    saveAll(); renderProductGrid(); updateInventoryStats(); goTo('inventory'); editingProductId = null;
-  });
 }
 
 /* ----------- Reports ----------- */
@@ -1056,7 +1026,7 @@ function initSettings(){
   });
 }
 
-/* ----------- Exports/Imports helpers ----------- */
+/* ----------- Storage ----------- */
 function saveAll(){
   localStorage.setItem('ub_invoices', JSON.stringify(invoices));
   localStorage.setItem('ub_products', JSON.stringify(products));
@@ -1090,7 +1060,6 @@ function initApp(){
   initClientsIO();
   initInventoryIO();
   initClientSearch();
-  initDetailForms();
   initSettings();
   initHotkeys();
 
@@ -1101,12 +1070,12 @@ function initApp(){
   renderClientGrid();
   renderReports();
 
-  // Single welcome toast (guarded)
+  // Single welcome toast
   setTimeout(()=>{
     showToast(`Welcome to UniBills — Version ${businessSettings.version} (Build ${businessSettings.build})`, 'welcome');
-  }, 500);
+  }, 400);
 }
 document.addEventListener('DOMContentLoaded', initApp);
 
 /* expose */
-window.BillsApp = { openWhatsappModal, shareInvoiceFormat, applyDateShortcut, openClientDetails, openProductDetails };
+window.BillsApp = { openWhatsappModal, shareInvoiceFormat, openClientDetails, openProductDetails };
