@@ -1,4 +1,4 @@
-/* UniBills v1.0.9905Z-Elite — script.js */
+/* UniBills v1.0.9905-Elite — script.js */
 
 /* ----------- In-memory Data ----------- */
 let invoices = [
@@ -54,7 +54,7 @@ function genId(prefix, list){
   return id;
 }
 function showToast(msg, type='success'){
-  if (type==='welcome' && window.__welcomed__) return; // ensure a single welcome toast
+  if (type==='welcome' && window.__welcomed__) return;
   if (type==='welcome') window.__welcomed__ = true;
 
   const c = document.getElementById('toastContainer');
@@ -224,12 +224,12 @@ function initInvoiceModal(){
   document.getElementById('btnToday')?.addEventListener('click', ()=>{
     const inp = document.getElementById('invoiceDate');
     const d = new Date();
-    inp.value = d.toISOString().split('T'); // YYYY-MM-DD for date inputs [6]
+    inp.value = d.toISOString().split('T')[0];
   });
   document.getElementById('btnYesterday')?.addEventListener('click', ()=>{
     const inp = document.getElementById('invoiceDate');
     const d = new Date(); d.setDate(d.getDate()-1);
-    inp.value = d.toISOString().split('T'); // set reliably [6]
+    inp.value = d.toISOString().split('T')[0];
   });
 
   // Paid button
@@ -255,7 +255,7 @@ function closeInvoiceModal(){
 function resetInvoiceForm(){
   const form = document.getElementById('invoiceForm');
   form.reset();
-  document.getElementById('invoiceDate').value = new Date().toISOString().split('T');
+  document.getElementById('invoiceDate').value = new Date().toISOString().split('T')[0];
 
   // keep one line item
   const wrap = document.querySelector('.invoice-items');
@@ -330,15 +330,14 @@ function initInvoiceForm(){
   // Delegate input changes for any dynamically added rows (fallback)
   document.addEventListener('input', (e)=>{
     if (e.target.matches('.quantity-input') || e.target.matches('.rate-input') || e.target.matches('#amountPaidInput') || e.target.matches('#invoiceTaxPct')){
-      updateInvoiceTotal(); // realtime calculations on input [4][11]
+      updateInvoiceTotal();
     }
   }, { passive:true });
 }
 function wireRowRealtimeInputs(row){
-  // Ensure immediate reaction to typing (not waiting for blur) [4]
+  // Ensure immediate reaction to typing
   row.querySelector('.quantity-input')?.addEventListener('input', updateInvoiceTotal, { passive:true });
   row.querySelector('.rate-input')?.addEventListener('input', updateInvoiceTotal, { passive:true });
-  // If product name cleared and retyped, nothing special needed; calculations depend on qty*rate
 }
 function addInvoiceItem(returnRow=false){
   const container = document.querySelector('.invoice-items');
@@ -460,7 +459,7 @@ function handleInvoiceSubmit(e){
       if (clientObj && phoneEl.value) clientObj.phone = phoneEl.value;
     } else {
       const newId = genId('client', clients);
-      clientObj = { id:newId, name: nameEl.value, phone: phoneEl.value, email:'', address:'' }; // preserve caps
+      clientObj = { id:newId, name: nameEl.value, phone: phoneEl.value, email:'', address:'' };
       clients.push(clientObj);
     }
 
@@ -557,7 +556,7 @@ function initClientDropdown(){
     input.dataset.clientId = c.id; input.value = c.name; phone.value = c.phone || '';
   };
   window.addNewClientFromTerm = (enc)=>{
-    const name = decodeURIComponent(enc); // preserve capitalization
+    const name = decodeURIComponent(enc);
     delete input.dataset.clientId;
     input.value = name; phone.focus();
     showToast(`Enter a contact number for "${name}"`, 'info');
@@ -616,14 +615,6 @@ function initSingleItemDropdown(input){
     updateInvoiceTotal();
   };
 }
-
-/* ----------- Date Shortcuts exposed (not used now; we use buttons) ----------- */
-window.applyDateShortcut = function(which){
-  const dateInput = document.getElementById('invoiceDate');
-  const d = new Date();
-  if (which==='yesterday'){ d.setDate(d.getDate()-1); }
-  dateInput.value = d.toISOString().split('T');
-};
 
 /* ----------- WhatsApp Share & Download ----------- */
 function openWhatsappModal(id){ sharingInvoiceId=id; document.getElementById('whatsappModal').classList.add('active'); document.body.style.overflow='hidden'; }
@@ -737,6 +728,27 @@ function buildInvoiceImage(inv){
   return wrap;
 }
 
+/* ----------- Download Invoice ----------- */
+function downloadInvoice(id){
+  const inv = invoices.find(i=>i.id===id);
+  if (!inv) return showToast('Invoice not found','error');
+  showLoading();
+  const node = buildInvoiceImage(inv);
+  document.body.appendChild(node);
+  html2canvas(node,{backgroundColor:'#ffffff',scale:2,useCORS:true}).then(canvas=>{
+    canvas.toBlob(blob=>{
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=`${inv.id}.png`; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 5000);
+      hideLoading(); node.remove();
+      showToast(`Invoice ${inv.id} downloaded successfully!`);
+    }, 'image/png');
+  }).catch(err=>{
+    console.error(err); node.remove(); hideLoading();
+    showToast('Failed to generate image','error');
+  });
+}
+
 /* ----------- Edit/Delete Invoice ----------- */
 function editInvoice(id){ openInvoiceModal(id); }
 function deleteInvoice(id){
@@ -822,13 +834,13 @@ function initInventoryIO(){
   document.getElementById('addProductBtn')?.addEventListener('click', ()=> openProductDetails(null));
 }
 function handleInventoryImport(e){
-  const file = e.target.files; if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   showLoading();
   const reader = new FileReader();
   reader.onload = ev=>{
     try{
       const wb = XLSX.read(ev.target.result,{type:'binary'});
-      const ws = wb.Sheets[wb.SheetNames];
+      const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(ws);
       let added=0;
       data.forEach(r=>{
@@ -936,13 +948,13 @@ function initClientsIO(){
   document.getElementById('addClientBtn')?.addEventListener('click', ()=> openClientDetails(null));
 }
 function handleClientsImport(e){
-  const file = e.target.files; if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   showLoading();
   const reader = new FileReader();
   reader.onload = ev=>{
     try{
       const wb = XLSX.read(ev.target.result,{type:'binary'});
-      const ws = wb.Sheets[wb.SheetNames];
+      const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(ws);
       let added=0;
       data.forEach(r=>{
@@ -973,6 +985,52 @@ function exportClientsXLSX(){
     XLSX.writeFile(wb, 'clients-export.xlsx', { compression:true });
     showToast('Exported clients to clients-export.xlsx');
   }catch(err){ console.error(err); showToast('Export failed','error'); }
+}
+
+/* ----------- Detail Forms Save (BUG FIX) ----------- */
+function initDetailForms(){
+  const cf = document.getElementById('clientDetailsForm');
+  if (cf){
+    cf.addEventListener('submit', function(e){
+      e.preventDefault(); // CRITICAL: prevent page reload/navigation
+      const name = document.getElementById('cd_name').value.trim();
+      const phone = document.getElementById('cd_phone').value.trim();
+      const email = document.getElementById('cd_email').value.trim();
+      const address = document.getElementById('cd_address').value.trim();
+      if (editingClientId){
+        const c = clients.find(x=>x.id===editingClientId);
+        if (c){ c.name=name; c.phone=phone; c.email=email; c.address=address; }
+        showToast('Client updated');
+      } else {
+        const id = genId('client', clients);
+        clients.push({ id, name, phone, email, address }); // preserve exact capitalization
+        showToast('Client added');
+      }
+      saveAll(); renderClientGrid(); goTo('clients'); editingClientId = null;
+    });
+  }
+
+  const pf = document.getElementById('productDetailsForm');
+  if (pf){
+    pf.addEventListener('submit', function(e){
+      e.preventDefault(); // CRITICAL: prevent page reload/navigation
+      const name = document.getElementById('pd_name').value.trim();
+      const category = document.getElementById('pd_category').value.trim();
+      const unit = document.getElementById('pd_unit').value.trim() || 'pcs';
+      const price = parseFloat(document.getElementById('pd_price').value)||0;
+      const stock = parseInt(document.getElementById('pd_stock').value)||0;
+      if (editingProductId){
+        const p = products.find(x=>x.id===editingProductId);
+        if (p){ p.name=name; p.category=category; p.unit=unit; p.price=price; p.stock=stock; }
+        showToast('Product updated');
+      } else {
+        const id = genId('PRD', products);
+        products.push({ id, name, category, unit, price, stock });
+        showToast('Product added');
+      }
+      saveAll(); renderProductGrid(); updateInventoryStats(); goTo('inventory'); editingProductId = null;
+    });
+  }
 }
 
 /* ----------- Reports ----------- */
@@ -1015,7 +1073,7 @@ function initSettings(){
     saveAll(); showToast('Settings saved');
   });
   document.getElementById('businessLogo')?.addEventListener('change', e=>{
-    const f = e.target.files; if (!f) return;
+    const f = e.target.files[0]; if (!f) return;
     const reader = new FileReader();
     reader.onload = ev=>{
       businessSettings.logo = ev.target.result;
@@ -1024,6 +1082,11 @@ function initSettings(){
     };
     reader.readAsDataURL(f);
   });
+}
+
+/* ----------- Quick Actions ----------- */
+function initQuickActions(){
+  document.getElementById('viewReports')?.addEventListener('click', ()=> goTo('reports'));
 }
 
 /* ----------- Storage ----------- */
@@ -1060,7 +1123,9 @@ function initApp(){
   initClientsIO();
   initInventoryIO();
   initClientSearch();
+  initDetailForms(); // CRITICAL: this binds form submit handlers with preventDefault
   initSettings();
+  initQuickActions();
   initHotkeys();
 
   refreshDashboard();
@@ -1069,11 +1134,6 @@ function initApp(){
   updateInventoryStats();
   renderClientGrid();
   renderReports();
-
-  // Single welcome toast
-  setTimeout(()=>{
-    showToast(`Welcome to UniBills — Version ${businessSettings.version} (Build ${businessSettings.build})`, 'welcome');
-  }, 400);
 }
 document.addEventListener('DOMContentLoaded', initApp);
 
