@@ -12,7 +12,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-  <!-- Header -->
   <header class="header">
     <nav class="nav-container">
       <div class="logo-section">
@@ -36,7 +35,7 @@
       <div class="section-header">
         <h1 class="section-title"><i class="fas fa-chart-pie"></i> Dashboard</h1>
         <div class="section-actions">
-          <button class="btn btn-primary" id="createInvoiceBtn"><i class="fas fa-plus"></i>Create Invoice</button>
+          <button class="btn btn-primary" id="createInvoiceBtn" type="button"><i class="fas fa-plus"></i>Create Invoice</button>
         </div>
       </div>
 
@@ -95,10 +94,10 @@
             </div>
             <div class="card-content">
               <div class="action-grid">
-                <button class="quick-action-btn" id="quickInvoice"><i class="fas fa-plus-circle"></i><span>New Invoice</span></button>
-                <button class="quick-action-btn" id="viewReports"><i class="fas fa-chart-bar"></i><span>View Reports</span></button>
-                <button class="quick-action-btn" id="qaDisabled1" title="Unavailable"><i class="fas fa-user-plus"></i><span>Coming Soon</span></button>
-                <button class="quick-action-btn" id="qaDisabled2" title="Unavailable"><i class="fas fa-box"></i><span>Coming Soon</span></button>
+                <button class="quick-action-btn" id="quickInvoice" type="button"><i class="fas fa-plus-circle"></i><span>New Invoice</span></button>
+                <button class="quick-action-btn" id="viewReports" type="button"><i class="fas fa-chart-bar"></i><span>View Reports</span></button>
+                <button class="quick-action-btn" id="qaDisabled1" type="button" title="Unavailable"><i class="fas fa-user-plus"></i><span>Coming Soon</span></button>
+                <button class="quick-action-btn" id="qaDisabled2" type="button" title="Unavailable"><i class="fas fa-box"></i><span>Coming Soon</span></button>
               </div>
             </div>
           </div>
@@ -121,7 +120,7 @@
             <option value="pending">Pending</option>
             <option value="overdue">Overdue</option>
           </select>
-          <button class="btn btn-primary" id="newInvoiceBtn"><i class="fas fa-plus"></i>New Invoice</button>
+          <button class="btn btn-primary" id="newInvoiceBtn" type="button"><i class="fas fa-plus"></i>New Invoice</button>
         </div>
       </div>
 
@@ -157,9 +156,9 @@
             <input type="text" id="productSearch" class="search-input" placeholder="Search inventory by name, category, unit..." aria-label="Search inventory" />
           </div>
           <input type="file" id="importInventoryFile" accept=".xlsx,.xls,.csv" style="display:none" />
-          <button class="btn btn-secondary" onclick="document.getElementById('importInventoryFile').click()"><i class="fas fa-file-import"></i>Import Inventory</button>
-          <button class="btn btn-secondary" id="exportInventoryBtn"><i class="fas fa-file-export"></i>Export Inventory</button>
-          <button class="btn btn-primary" id="addProductBtn"><i class="fas fa-plus"></i>Add Product</button>
+          <button class="btn btn-secondary" type="button" onclick="document.getElementById('importInventoryFile').click()"><i class="fas fa-file-import"></i>Import Inventory</button>
+          <button class="btn btn-secondary" id="exportInventoryBtn" type="button"><i class="fas fa-file-export"></i>Export Inventory</button>
+          <button class="btn btn-primary" id="addProductBtn" type="button"><i class="fas fa-plus"></i>Add Product</button>
         </div>
       </div>
 
@@ -184,9 +183,9 @@
             <input type="text" id="clientSearch" class="search-input" placeholder="Search clients by name, phone, email..." aria-label="Search clients" />
           </div>
           <input type="file" id="importClientsFile" accept=".xlsx,.xls,.csv" style="display:none" />
-          <button class="btn btn-secondary" onclick="document.getElementById('importClientsFile').click()"><i class="fas fa-file-import"></i>Import Clients</button>
-          <button class="btn btn-secondary" id="exportClientsBtn"><i class="fas fa-file-export"></i>Export Clients</button>
-          <button class="btn btn-primary" id="addClientBtn"><i class="fas fa-user-plus"></i>Add Client</button>
+          <button class="btn btn-secondary" type="button" onclick="document.getElementById('importClientsFile').click()"><i class="fas fa-file-import"></i>Import Clients</button>
+          <button class="btn btn-secondary" id="exportClientsBtn" type="button"><i class="fas fa-file-export"></i>Export Clients</button>
+          <button class="btn btn-primary" id="addClientBtn" type="button"><i class="fas fa-user-plus"></i>Add Client</button>
         </div>
       </div>
 
@@ -318,7 +317,7 @@
       <div class="section-header">
         <h1 class="section-title"><i class="fas fa-user"></i> Client Details</h1>
         <div class="section-actions">
-          <button class="btn btn-secondary" id="backToClients"><i class="fas fa-arrow-left"></i>Back to Clients</button>
+          <button class="btn btn-secondary" id="backToClients" type="button"><i class="fas fa-arrow-left"></i>Back to Clients</button>
         </div>
       </div>
       <div class="card" style="padding:20px;">
@@ -353,7 +352,7 @@
       <div class="section-header">
         <h1 class="section-title"><i class="fas fa-box-open"></i> Inventory Details</h1>
         <div class="section-actions">
-          <button class="btn btn-secondary" id="backToInventory"><i class="fas fa-arrow-left"></i>Back to Inventory</button>
+          <button class="btn btn-secondary" id="backToInventory" type="button"><i class="fas fa-arrow-left"></i>Back to Inventory</button>
         </div>
       </div>
       <div class="card" style="padding:20px;">
@@ -393,7 +392,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2><i class="fas fa-file-invoice"></i> Create New Invoice</h2>
-        <button class="modal-close" id="closeModal">&times;</button>
+        <button class="modal-close" id="closeModal" type="button">&times;</button>
       </div>
       <div class="modal-body">
         <form id="invoiceForm">
@@ -504,13 +503,13 @@
     <div class="modal-content small-modal">
       <div class="modal-header">
         <h2><i class="fab fa-whatsapp"></i> Share Invoice</h2>
-        <button class="modal-close" onclick="closeWhatsappModal()">&times;</button>
+        <button class="modal-close" onclick="closeWhatsappModal()" type="button">&times;</button>
       </div>
       <div class="modal-body">
         <p>Choose format to share invoice:</p>
         <div class="share-options">
-          <button class="share-option-btn" onclick="shareInvoiceFormat('text')"><i class="fas fa-align-left"></i><span>Text Format</span><small>Simple text message</small></button>
-          <button class="share-option-btn" onclick="shareInvoiceFormat('image')"><i class="fas fa-image"></i><span>Image Format</span><small>Clean, branded image</small><span class="new-badge">NEW</span></button>
+          <button class="share-option-btn" type="button" onclick="shareInvoiceFormat('text')"><i class="fas fa-align-left"></i><span>Text Format</span><small>Simple text message</small></button>
+          <button class="share-option-btn" type="button" onclick="shareInvoiceFormat('image')"><i class="fas fa-image"></i><span>Image Format</span><small>Clean, branded image</small><span class="new-badge">NEW</span></button>
         </div>
       </div>
     </div>
@@ -525,7 +524,6 @@
 
   <script src="script.js"></script>
   <script>
-    // One-time welcome toast for the new version
     document.addEventListener('DOMContentLoaded', function(){
       if (window.__welcomed__) return;
       window.__welcomed__ = true;
@@ -539,27 +537,7 @@
         c.appendChild(t);
         t.querySelector('.toast-close').addEventListener('click', ()=> t.remove());
         setTimeout(()=> t.remove(), 5000);
-      }, 500);
-    });
-
-    // Bind date shortcut buttons (explicit buttons instead of dropdown)
-    document.addEventListener('DOMContentLoaded', function(){
-      const dateInput = document.getElementById('invoiceDate');
-      const btnToday = document.getElementById('btnToday');
-      const btnYesterday = document.getElementById('btnYesterday');
-      if (dateInput && btnToday){
-        btnToday.addEventListener('click', ()=>{
-          const d = new Date();
-          dateInput.value = d.toISOString().split('T');
-        });
-      }
-      if (dateInput && btnYesterday){
-        btnYesterday.addEventListener('click', ()=>{
-          const d = new Date();
-          d.setDate(d.getDate()-1);
-          dateInput.value = d.toISOString().split('T');
-        });
-      }
+      }, 400);
     });
   </script>
 </body>
